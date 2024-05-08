@@ -10,8 +10,11 @@ services:
     image: postgres:12
     volumes:
       - db-data:/var/lib/postgresql/data
+    environment: ['POSTGRES_PASSWORD=root']
 volumes:
+  type: bind
   db-data: {}
 networks:
   default:
     driver: bridge
+
