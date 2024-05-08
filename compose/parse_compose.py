@@ -18,6 +18,28 @@
 import yaml
 from pprint import pprint
 
+# def parse_yaml_to_ast(filename):
+#     with open(filename, 'r') as file:
+#         yaml_content = yaml.safe_load(file)
+#         return create_ast(None, yaml_content)
+
+# class ComposeNode:
+#     """Represents a node in the Docker Compose AST."""
+#     def __init__(self, key, value):
+#         self.key = key  # This could be 'services', 'volumes', 'networks', etc.
+#         self.value = value  # This could be a dict, list, or terminal value
+#         self.children = []  # List of ComposeNode
+
+#         if isinstance(value, dict):
+#             for subkey, subvalue in value.items():
+#                 self.children.append(ComposeNode(subkey, subvalue))
+#         elif isinstance(value, list):
+#             for item in value:
+#                 self.children.append(ComposeNode(None, item))  # No key for list items
+
+# def create_ast(key, value):
+#     return ComposeNode(key, value)
+
 def parse_yaml_to_ast(filename):
     with open(filename, 'r') as file:
         # Load YAML content
