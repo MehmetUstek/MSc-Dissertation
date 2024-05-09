@@ -22,3 +22,16 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
     
+def logger_with_custom_formatter(dockerfile_path):
+    # create logger
+    logger = logging.getLogger(dockerfile_path)
+    logger.setLevel(logging.DEBUG)
+
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    ch.setFormatter(CustomFormatter())
+
+    logger.addHandler(ch)
+    return logger

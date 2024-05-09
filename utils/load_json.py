@@ -1,6 +1,8 @@
 import json
+import sys
+sys.path.append("..")
 
-def load_configuration(file_path):
+def load_json(file_path):
     """Loads JSON data from a specified file path and returns it."""
     try:
         with open(file_path, 'r') as file:

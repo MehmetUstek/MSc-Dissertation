@@ -11,7 +11,6 @@
 #         for item in ast:
 #             check_missing_configurations(item, required_configurations, alerts)
 
-from antipattern_descriptions import compose_error_descriptions
 
 # def check_missing_configurations(ast, required_configurations, alerts, path=''):
 #     if isinstance(ast, dict):
@@ -67,7 +66,7 @@ from antipattern_descriptions import compose_error_descriptions
 #             check_missing_configurations(item, required_configurations, alerts, path)
 
 
-def check_missing_configurations(ast, required_configurations, alerts):
+def check_missing_configurations(ast, required_configurations, alerts,compose_error_descriptions):
     """Checks for missing configurations in the AST."""
     if isinstance(ast, dict):
         for config in required_configurations:
@@ -79,7 +78,7 @@ def check_missing_configurations(ast, required_configurations, alerts):
                     for key, expected_value in config_details.items():
                         if key not in service_config :
                             # or service_config[key] in range(expected_value)
-                            alerts.append([f"Missing or incorrect configuration in service '{service_name}' : {compose_error_descriptions[error_no]}",5])
+                            alerts.append([f"Missing or incorrect configuration in service '{service_name}' : {compose_error_descriptions[str(error_no)]}",5])
     elif isinstance(ast, list):
         for item in ast:
             check_missing_configurations(item, required_configurations, alerts)
