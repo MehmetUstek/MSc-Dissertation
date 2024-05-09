@@ -1,0 +1,37 @@
+[
+  {
+    "services": {
+      "service": {
+        "cpus": 0.5
+      }
+    },
+    "errorNo": 7
+  },
+
+  {
+    "services": {
+      "service": {
+        "mem_limit": "100m"
+      }
+    },
+    "errorNo": 8
+  },
+
+  {
+    "services": {
+      "service": {
+        "restart": { "on-failure": 5 }
+      }
+    },
+    "errorNo": 9
+  },
+
+  {
+    "services": {
+      "service": {
+        "ulimits": []
+      }
+    },
+    "errorNo": 10
+  }
+]

@@ -1,0 +1,6 @@
+[
+  { "environment": ["PASSWORD"], "errorNo": 1 },
+  { "volumes": { "type": "bind" }, "errorNo": 2 },
+  { "ports": ["0.0.0.0"], "errorNo": 3 },
+  { "volumes": ["/var/run/docker.sock"], "errorNo": 6 }
+]

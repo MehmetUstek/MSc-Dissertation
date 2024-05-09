@@ -6,20 +6,21 @@ services:
       - "5000:5000"
     volumes:
       - /path/to/volume:app/data1
-    
+    cpus: 0.5
+
   db:
     image: postgres:12
     volumes:
       - db-data:/var/lib/postgresql/data
-    environment: ['POSTGRES_PASSWORD=root']
+      - /path/to/volume:app/data1
+      - /var/run/docker.sock
+    environment: ["POSTGRES_PASSWORD=root"]
     ports:
       - "0.0.0.0:3080:8000"
-    volumes:
-      - /path/to/volume:app/data1
+
 volumes:
   type: bind
   db-data: {}
 networks:
   default:
     driver: bridge
-
