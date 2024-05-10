@@ -1,1 +1,2 @@
 from .missing_configurations import check_missing_configurations
+from .compose_vulnerability_detection import get_compose_file_vulnerabilities

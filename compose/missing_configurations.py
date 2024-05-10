@@ -72,13 +72,14 @@ def check_missing_configurations(ast, required_configurations, alerts,compose_er
         for config in required_configurations:
             config_details = config.get('services', {}).get('service', {})
             error_no = config.get('errorNo', 'Unknown error number')
+            severity = config.get('severity', 'Unknown severity number')
 
             if 'services' in ast:
                 for service_name, service_config in ast['services'].items():
                     for key, expected_value in config_details.items():
                         if key not in service_config :
                             # or service_config[key] in range(expected_value)
-                            alerts.append([f"Missing or incorrect configuration in service '{service_name}' : {compose_error_descriptions[str(error_no)]}",5])
+                            alerts.append([f"Missing or incorrect configuration in service '{service_name}' : {compose_error_descriptions[str(error_no)]}",severity])
     elif isinstance(ast, list):
         for item in ast:
             check_missing_configurations(item, required_configurations, alerts)
