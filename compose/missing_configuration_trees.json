@@ -1,41 +1,100 @@
 [
   {
-    "services": {
-      "service": {
-        "cpus": 0.5
+    "path": {
+      "services": {
+        "service": {
+          "cpus": 0.5
+        }
       }
     },
+
     "errorNo": 7,
-    "severity": 5
+    "severity": 5,
+    "expectedValue": false,
+    "level": 1
   },
 
   {
-    "services": {
-      "service": {
-        "mem_limit": "100m"
+    "path": {
+      "services": {
+        "service": {
+          "mem_limit": "100m"
+        }
       }
     },
     "errorNo": 8,
-    "severity": 5
+    "severity": 5,
+    "expectedValue": false,
+    "level": 1
   },
 
   {
-    "services": {
-      "service": {
-        "restart": { "on-failure": 5 }
+    "path": {
+      "services": {
+        "service": {
+          "restart": { "on-failure": 5 }
+        }
       }
     },
     "errorNo": 9,
-    "severity": 5
+    "severity": 5,
+    "expectedValue": false,
+    "level": 1
   },
 
   {
-    "services": {
-      "service": {
-        "ulimits": []
+    "path": {
+      "services": {
+        "service": {
+          "ulimits": []
+        }
+      }
+    },
+    "errorNo": 10,
+    "severity": 5,
+    "expectedValue": false,
+    "level": 1
+  },
+
+  {
+    "path": {
+      "services": {
+        "service": {
+          "volumes": ":(ro|rw)\\b"
+        }
       }
     },
     "errorNo": 5,
-    "severity": 5
+    "severity": 9,
+    "expectedValue": true,
+    "level": 1
+  },
+
+  {
+    "path": {
+      "services": {
+        "service": {
+          "security_opt": { "no-new-privileges": true }
+        }
+      }
+    },
+    "errorNo": 11,
+    "severity": 3,
+    "expectedValue": false,
+    "level": 1
+  },
+
+  {
+    "path": {
+      "services": {
+        "service": {
+          "read_only": true
+        }
+      }
+    },
+    "errorNo": 12,
+    "severity": 10,
+    "expectedValue": true,
+    "level": 1
   }
 ]

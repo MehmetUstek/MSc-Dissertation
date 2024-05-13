@@ -9,6 +9,7 @@
   "8": "Memory limit should be specified.",
   "9": "Limit Number of Restarts.",
   "10": "Specify ulimits to limit number of processors and file descriptors",
-  "11": "",
-  "12": ""
+  "11": "Limit capabilities (Grant only specific capabilities, needed by a container)",
+  "12": "Set filesystem and volumes to read-only",
+  "13": "Do not specify privileged images."
 }
