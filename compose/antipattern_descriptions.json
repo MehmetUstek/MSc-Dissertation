@@ -13,5 +13,6 @@
   "12": "Set filesystem and volumes to read-only",
   "13": "Do not specify privileged images.",
   "14": "User should not be root.",
-  "15": "Using 'latest' tag, which may lead to unstable builds."
+  "15": "Using 'latest' tag, which may lead to unstable builds.",
+  "16": "Use init option in the docker file image. Example: app:\n\timage: your_image \n\t\tinit: true"
 }

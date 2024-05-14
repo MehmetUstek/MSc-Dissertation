@@ -96,5 +96,17 @@
     "severity": 10,
     "expectedValue": true,
     "level": 1
+  },
+
+  {
+    "path": {
+      "service": {
+        "init": true
+      }
+    },
+    "errorNo": 16,
+    "severity": 10,
+    "expectedValue": true,
+    "level": 1
   }
 ]
