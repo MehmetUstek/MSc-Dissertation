@@ -11,5 +11,7 @@
   "10": "Specify ulimits to limit number of processors and file descriptors",
   "11": "Limit capabilities (Grant only specific capabilities, needed by a container)",
   "12": "Set filesystem and volumes to read-only",
-  "13": "Do not specify privileged images."
+  "13": "Do not specify privileged images.",
+  "14": "User should not be root.",
+  "15": "Using 'latest' tag, which may lead to unstable builds."
 }

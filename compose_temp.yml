@@ -1,29 +1,29 @@
 version: "3.8"
 services:
-  webapp:
-    image: webapp:latest
-    ports:
-      - "5000:5000"
+  db:
+    image: postgres:latest
+    # ports:
+    #   - "5000:5000"
     volumes:
-      - /path/to/volume:app/data1:ro
+      - /:/app/data:ro
     cpus: 0.5
     security_opt:
       - no-new-privileges:true
     privileged: true
+    user: "root"
+#   db:
+#     image: postgres:12
+#     volumes:
+#       - db-data:/var/lib/postgresql/data:rw
+#       - /path/to/volume:app/data1:rw
+#       - /var/run/docker.sock:ro
+#     environment: ["POSTGRES_PASSWORD=root"]
+#     ports:
+#       - "0.0.0.0:3080:8000"
 
-  db:
-    image: postgres:12
-    volumes:
-      - db-data:/var/lib/postgresql/data:rw
-      - /path/to/volume:app/data1:rw
-      - /var/run/docker.sock:ro
-    environment: ["POSTGRES_PASSWORD=root"]
-    ports:
-      - "0.0.0.0:3080:8000"
-
-volumes:
-  type: bind
-  db-data: {}
-networks:
-  default:
-    driver: bridge
+# volumes:
+#   type: bind
+#   db-data: {}
+# networks:
+#   default:
+#     driver: bridge

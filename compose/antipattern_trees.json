@@ -3,5 +3,7 @@
   { "volumes": { "type": "bind" }, "errorNo": 2, "severity": 10 },
   { "ports": ["0.0.0.0"], "errorNo": 3, "severity": 10 },
   { "volumes": ["/var/run/docker.sock"], "errorNo": 6, "severity": 10 },
-  { "privileged": true, "errorNo": 13, "severity": 10 }
+  { "privileged": true, "errorNo": 13, "severity": 10 },
+  { "user": "root", "errorNo": 14, "severity": 10 },
+  { "image": ":latest", "errorNo": 15, "severity": 10 }
 ]
