@@ -21,6 +21,7 @@ def search_github(token, query, start_page=1, items_per_page=30):
     }
     response = requests.get(url, headers=headers, params=params)
     data = response.json()
+    # print("data",data)
     return data['items'], response.headers
 
 def download_files(items, directory="downloaded_compose_files", last_index_file="last_index.txt"):
@@ -72,19 +73,20 @@ if __name__ == '__main__':
     start_page = (start_index // items_per_page) + 1
 
     # Compose file search queries
-    compose_files = ['filename:docker-compose.yml', 'filename:docker-compose.yaml', 'filename:compose.yml', 'filename:compose.yaml']
+    # compose_files = ['filename:docker-compose.yml', 'filename:docker-compose.yaml', 'filename:compose.yml', 'filename:compose.yaml']
+    file_query = 'filename:compose.yaml'
     all_items = []
 
-    for file_query in compose_files:
-        keep_searching = True
-        while keep_searching:
-            items, headers = search_github(github_token, file_query, start_page=start_page)
-            download_files(items)
-            if 'next' in headers.get('Link', ''):
-                start_page += 1
-            else:
-                keep_searching = False
-            # Check rate limits
-            if int(headers.get('X-RateLimit-Remaining', 1)) < 10:
-                print("Approaching rate limit, pausing for a minute...")
-                time.sleep(70)  # Sleep for one min
+    # for file_query in compose_files:
+    keep_searching = True
+    while keep_searching:
+        items, headers = search_github(github_token, file_query, start_page=start_page, items_per_page=items_per_page)
+        download_files(items)
+        if 'next' in headers.get('Link', ''):
+            start_page += 1
+        else:
+            keep_searching = False
+        # Check rate limits
+        if int(headers.get('X-RateLimit-Remaining', 1)) < 10:
+            print("Approaching rate limit, pausing for a minute...")
+            time.sleep(70)  # Sleep for one min
