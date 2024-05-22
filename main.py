@@ -9,9 +9,9 @@ import os
 # Compose at local: python3 main.py -f compose.yaml
 # Dockerfile at local: python3 main.py -f Dockerfile
 
-def get_single_file_vulnerability(file_path):
+def get_single_file_vulnerability(file_path, baseImageScan = False):
     if get_file_extension(file_path) == ".Dockerfile" or get_filename(file_path) == "Dockerfile" :
-        get_dockerfile_vulnerabilities(file_path)
+        get_dockerfile_vulnerabilities(file_path,baseImageScan)
     else:
         get_compose_file_vulnerabilities(file_path)
 
@@ -32,6 +32,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help='Absolute file path to process IaC configuration file', required=False)
     group.add_argument('-d', '--directory', type=str, help='Absolute directory path to process IaC configuration file', required=False)
+    parser.add_argument('-bis', '--baseImageScan', type=bool, help='Base Image Scan, false by default', required=False, default=False)
     
     args = parser.parse_args()
 
@@ -43,7 +44,7 @@ def main():
     elif args.file: 
         print(f"The provided file path is: {args.file}")
         file_path = args.file
-        get_single_file_vulnerability(os.path.abspath(file_path))
+        get_single_file_vulnerability(os.path.abspath(file_path), args.baseImageScan)
     else:
         print("No file or directory specified.")
     
