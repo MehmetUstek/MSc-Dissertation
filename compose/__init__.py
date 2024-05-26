@@ -1,3 +1,3 @@
 from .missing_configurations import check_missing_configurations
 from .compose_vulnerability_detection import get_compose_file_vulnerabilities
-from .vectorapproach2 import vectoral_scan
+from .vectoralscan import vectoral_scan

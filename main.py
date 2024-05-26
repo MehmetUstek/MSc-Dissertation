@@ -1,6 +1,6 @@
 from compose.compose_vulnerability_detection import get_compose_file_vulnerabilities
 from dockerfileVulnerability.dockerfile_vulnerability_detection import get_dockerfile_vulnerabilities
-from compose.vectorapproach2 import vectoral_scan
+from compose.vectoralscan import vectoral_scan
 from utils.file_extension import get_file_extension, get_filename
 import argparse
 import os
