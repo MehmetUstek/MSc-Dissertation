@@ -1,0 +1,16 @@
+[
+  {
+    "antipattern_tree": { "environment": ["PASSWORD"] },
+    "antipattern_max_depth": 2,
+    "antipattern_min_depth": 1,
+    "errorNo": 1,
+    "severity": 10
+  },
+  {
+    "antipattern_tree": { "volumes": { "type": "bind" } },
+    "antipattern_max_depth": 3,
+    "antipattern_min_depth": 2,
+    "errorNo": 2,
+    "severity": 10
+  }
+]

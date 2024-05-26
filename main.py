@@ -1,5 +1,6 @@
 from compose.compose_vulnerability_detection import get_compose_file_vulnerabilities
 from dockerfileVulnerability.dockerfile_vulnerability_detection import get_dockerfile_vulnerabilities
+from compose.vectorapproach2 import vectoral_scan
 from utils.file_extension import get_file_extension, get_filename
 import argparse
 import os
@@ -13,7 +14,8 @@ def get_single_file_vulnerability(file_path, baseImageScan = False):
     if get_file_extension(file_path) == ".Dockerfile" or get_filename(file_path) == "Dockerfile" :
         get_dockerfile_vulnerabilities(file_path,baseImageScan)
     else:
-        get_compose_file_vulnerabilities(file_path)
+        # get_compose_file_vulnerabilities(file_path)
+        vectoral_scan(file_path)
 
 
 def get_directory_file_vulnerability(directory_path):

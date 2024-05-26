@@ -43,7 +43,8 @@ print("trees", trees)
 sequences = prepare_data(trees)
 
 # Train Word2Vec model
-model = Word2Vec(sentences=sequences, vector_size=100, window=5, min_count=1, workers=4)
+model = Word2Vec(sentences=sequences, vector_size=50, window=2, min_count=1, workers=4,negative=10,              # If > 0, negative sampling will be used
+epochs=10 )
 
 # Save the model
 model.save("docker_compose_embeddings.model")
