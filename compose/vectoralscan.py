@@ -7,6 +7,7 @@ from utils.logs.severity_printer import print_severity
 
 model_path = './compose/vectorization/docker_compose_embeddings.model'
 node_embeddings = Word2Vec.load(model_path)
+compose_error_descriptions = load_json('compose/antipattern_descriptions.json')
 
 def tree_vector(tree, model):
     """ Generate a vector for the tree using the Word2Vec model for embeddings.
@@ -51,19 +52,29 @@ def traverse_and_compare(ast, antipattern_vector, error, severity, logger, depth
     # print("depth",depth)
 
     if isinstance(ast, dict):
-        for key, subtree in ast.items():
+        # print("astitems:",ast.items())
+        for ast_item in ast.items():
+            key, subtree = ast_item
+            item_dict = {key: subtree}
+            # print("ast_item",ast_item)
+            # print("item_dict",item_dict)
+
+            # key_value_pair = f"{{{key}:{subtree}}}"
+            # print("key_value_pair",key_value_pair)
             new_path = f"{path}/{key}" if path else key
             if isinstance(subtree, dict) or isinstance(subtree, list):
+
                 traverse_and_compare(subtree, antipattern_vector,  error, severity, logger, depth+1,min_depth, max_depth, new_path)
             elif depth >= min_depth:  # Only compare at or beyond the minimum depth
                 # Process and compare at the current depth if it's less than or equal to max_depth
                 # print("ast",ast)
                 # print("ast_depth",depth)
-                branch_vector = tree_vector(ast, node_embeddings)  # Ensure you adjust this call according to your vector generation logic
+                # print("final:",subtree)
+                branch_vector = tree_vector(item_dict, node_embeddings)  # Ensure you adjust this call according to your vector generation logic
                 similarity = cosine_similarity(branch_vector, antipattern_vector)
                 # print("cosine similarity:", similarity)
                 if similarity > 0.85:
-                    print_severity(logger, severity, f"High similarity found: {similarity} in branch {new_path}, in ast: {ast}")
+                    print_severity(logger, severity, f"{compose_error_descriptions[str(error)]} \n\tHigh similarity found: {similarity} in branch {new_path}, in ast: {item_dict} with depth:{depth}\n")
                     # logging.warning(f"High similarity found: {similarity} in branch {new_path}, in ast {ast}")
     elif isinstance(ast, list):
         for idx, item in enumerate(ast):

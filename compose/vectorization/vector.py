@@ -35,7 +35,7 @@ def prepare_data(trees):
     return sequences
 
 # Directory containing your Docker Compose files
-compose_directory = '../../../composefiles_datastore' ## TODO
+compose_directory = '../../composefiles_datastore' ## TODO
 
 # Load and prepare data
 trees = load_compose_files(compose_directory)
@@ -43,8 +43,8 @@ print("trees", trees)
 sequences = prepare_data(trees)
 
 # Train Word2Vec model
-model = Word2Vec(sentences=sequences, vector_size=50, window=2, min_count=1, workers=4,negative=10,              # If > 0, negative sampling will be used
-epochs=10 )
+model = Word2Vec(sentences=sequences, vector_size=50, window=5, min_count=1, workers=4,negative=10,              # If > 0, negative sampling will be used
+epochs=100 )
 
 # Save the model
 model.save("docker_compose_embeddings.model")

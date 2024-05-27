@@ -1,8 +1,8 @@
 [
   {
     "antipattern_tree": { "environment": ["PASSWORD"] },
-    "antipattern_max_depth": 2,
-    "antipattern_min_depth": 1,
+    "antipattern_max_depth": 3,
+    "antipattern_min_depth": 2,
     "errorNo": 1,
     "severity": 10
   },
@@ -15,8 +15,8 @@
   },
   {
     "antipattern_tree": { "ports": ["0.0.0.0"] },
-    "antipattern_max_depth": 3,
-    "antipattern_min_depth": 2,
+    "antipattern_max_depth": 2,
+    "antipattern_min_depth": 1,
     "errorNo": 3,
     "severity": 10
   },
@@ -29,22 +29,22 @@
   },
   {
     "antipattern_tree": { "privileged": true },
-    "antipattern_max_depth": 3,
-    "antipattern_min_depth": 2,
+    "antipattern_max_depth": 2,
+    "antipattern_min_depth": 1,
     "errorNo": 13,
     "severity": 10
   },
   {
-    "antipattern_tree": { "user": "root" },
-    "antipattern_max_depth": 3,
-    "antipattern_min_depth": 2,
+    "antipattern_tree":  {"user": "root" },
+    "antipattern_max_depth": 2,
+    "antipattern_min_depth": 1,
     "errorNo": 14,
     "severity": 10
   },
   {
     "antipattern_tree": { "image": ":latest" },
-    "antipattern_max_depth": 3,
-    "antipattern_min_depth": 2,
+    "antipattern_max_depth": 2,
+    "antipattern_min_depth": 1,
     "errorNo": 15,
     "severity": 10
   }
