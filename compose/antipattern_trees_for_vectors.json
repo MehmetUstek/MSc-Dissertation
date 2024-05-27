@@ -12,5 +12,40 @@
     "antipattern_min_depth": 2,
     "errorNo": 2,
     "severity": 10
+  },
+  {
+    "antipattern_tree": { "ports": ["0.0.0.0"] },
+    "antipattern_max_depth": 3,
+    "antipattern_min_depth": 2,
+    "errorNo": 3,
+    "severity": 10
+  },
+  {
+    "antipattern_tree": { "volumes": ["/var/run/docker.sock"] },
+    "antipattern_max_depth": 3,
+    "antipattern_min_depth": 2,
+    "errorNo": 6,
+    "severity": 10
+  },
+  {
+    "antipattern_tree": { "privileged": true },
+    "antipattern_max_depth": 3,
+    "antipattern_min_depth": 2,
+    "errorNo": 13,
+    "severity": 10
+  },
+  {
+    "antipattern_tree": { "user": "root" },
+    "antipattern_max_depth": 3,
+    "antipattern_min_depth": 2,
+    "errorNo": 14,
+    "severity": 10
+  },
+  {
+    "antipattern_tree": { "image": ":latest" },
+    "antipattern_max_depth": 3,
+    "antipattern_min_depth": 2,
+    "errorNo": 15,
+    "severity": 10
   }
 ]
