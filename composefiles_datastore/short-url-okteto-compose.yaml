@@ -1,0 +1,6 @@
+version: "3.10"
+services:
+  worker:
+    build: .
+    environment:
+      - DATABASE_URL=${DATABASE_URL}

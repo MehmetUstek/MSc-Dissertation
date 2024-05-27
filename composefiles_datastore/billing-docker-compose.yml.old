@@ -1,0 +1,46 @@
+version: "3"
+services:
+  main_net:
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./ganache_data:/ganache_data
+    entrypoint:
+      - node
+      - /app/ganache-core.docker.cli.js
+      - --networkId
+      - '5555'
+      - -e
+      - '10000'
+  # node:
+  #   # image: billing_node:clear
+  #   build:
+  #     context: .
+  #     dockerfile: node.docker
+  #     args:
+  #       password: word
+  #       bootnode: enode://938cb74ddd084f7441344ed4a86e9a3aa813351537470322c6529cb42af6806c136617588352b52561bd587c3763c190990a82ff9ec3c534ba32c8fc39e8ccd6@127.0.0.1:30301
+  #   volumes:
+  #     - storage:/opt/storage
+  #   ports:
+  #     - 30307:30307
+  #     - 7545:7545 
+  #     - 8546:8546
+  #   depends_on:
+  #     - main_net
+  api:
+    image: prometeusnetwork/billing_api:v0.0.1
+    # build:
+    #   context: .
+    #   dockerfile: api.docker
+    # volumes:
+    #   - ~/Prometeus/billing/usr/src/
+    ports:
+      - 3001:3001
+    depends_on:
+      - node
+      - main_net
+    # command: ["./wait-for-it.sh", "-t", "60", "node:7545", "--", "npm", "run", "start:prod"]
+volumes:
+  storage:

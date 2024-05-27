@@ -1,0 +1,102 @@
+##############################################################################
+# Copyright (c) 2018 Mirantis Inc., Enea AB and others.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+{%- import 'net_map.j2' as nm with context %}
+{%- import 'net_macros.j2' as ma with context %}
+{#- conf.MCPCONTROL_NET & co are mandatory, defaults are set via globals.sh #}
+{%- set net_mcpcontrol = [conf.MCPCONTROL_NET, conf.MCPCONTROL_PREFIX] | join("/") %}
+version: '2'
+services:
+  opnfv-fuel-salt-master:
+    container_name: "fuel"
+    image: "opnfv/fuel:saltmaster-reclass-{{ conf.MCP_DOCKER_TAG }}"
+    restart: always
+    networks:
+      mcpcontrol:
+        ipv4_address: {{ conf.SALT_MASTER }}
+      pxebr:
+        ipv4_address: {{ nm.net_admin | ipnet_hostaddr(nm.start_ip[nm.net_admin] + nm.net_admin_hosts.index('opnfv_infra_config_pxe_admin_address') +1) }}
+      mgmt:
+        ipv4_address: {{ nm.net_mgmt | ipnet_hostaddr(nm.start_ip[nm.net_mgmt] + nm.net_mgmt_hosts.index('opnfv_infra_config_address') +1) }}
+    volumes:
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro
+      - {{ conf.MCP_REPO_ROOT_PATH }}:/root/fuel
+      - {{ conf.MCP_REPO_ROOT_PATH }}/mcp/scripts/docker-compose/files/entrypoint.sh:/entrypoint.sh
+      - {{ conf.MCP_STORAGE_DIR }}/pod_config.yml:/root/pod_config.yml
+      - {{ conf.MCP_STORAGE_DIR }}/nodes:/srv/salt/reclass/nodes
+      - {{ conf.MCP_STORAGE_DIR }}/pki:/etc/pki
+      - {{ conf.MCP_STORAGE_DIR }}/salt:/etc/salt
+      - {{ conf.MCP_STORAGE_DIR }}/hosts:/etc/hosts
+{%- if conf.MCP_VCP or '-vcp-' in conf.MCP_DEPLOY_SCENARIO %}
+      - {{ conf.MCP_STORAGE_DIR }}/base_image_opnfv_fuel_vcp.img:/srv/salt/env/prd/salt/files/control/images/base_image_opnfv_fuel_vcp.img
+{%- endif %}
+    hostname: cfg01
+    domainname: {{ conf.cluster.domain }}
+    privileged: true
+    dns:
+{%- for server in nm.dns_public %}
+      - {{ server }}
+{%- endfor %}
+{%- if nm.cluster.has_baremetal_nodes %}
+  opnfv-fuel-maas:
+    container_name: "maas"
+    image: "opnfv/fuel:saltminion-maas-{{ conf.MCP_DOCKER_TAG }}"
+    restart: always
+    networks:
+      mcpcontrol:
+        ipv4_address: {{ conf.MAAS_IP }}
+      pxebr:
+        ipv4_address: {{ nm.net_admin | ipnet_hostaddr(nm.start_ip[nm.net_admin] + nm.net_admin_hosts.index('opnfv_infra_maas_node01_deploy_address') +1) }}
+      mgmt:
+        ipv4_address: {{ nm.net_mgmt | ipnet_hostaddr(nm.start_ip[nm.net_mgmt] + nm.net_mgmt_hosts.index('opnfv_infra_maas_node01_address') +1) }}
+    volumes:
+      - /lib/modules:/lib/modules:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro
+      - {{ conf.MCP_REPO_ROOT_PATH }}/mcp/scripts/docker-compose/files/entrypoint_maas.sh:/entrypoint.sh:ro
+      - {{ conf.MCP_STORAGE_DIR }}/hosts:/etc/hosts:ro
+      - {{ conf.MCP_STORAGE_DIR }}/mas01/etc/iptables:/etc/iptables
+      - {{ conf.MCP_STORAGE_DIR }}/mas01/var/lib/postgresql:/var/lib/postgresql
+      - {{ conf.MCP_STORAGE_DIR }}/mas01/var/lib/maas:/var/lib/maas
+      - {{ conf.MCP_STORAGE_DIR }}/mas01/var/spool/maas-proxy:/var/spool/maas-proxy
+      - {{ conf.MCP_STORAGE_DIR }}/mas01/etc/maas:/etc/maas
+    hostname: mas01
+    domainname: {{ conf.cluster.domain }}
+    privileged: true
+    dns:
+{%- for server in nm.dns_public %}
+      - {{ server }}
+{%- endfor %}
+    ports:
+      - 5240:5240
+{%- endif %}
+networks:
+  mcpcontrol:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 9000
+    ipam:
+      config:
+        - subnet: {{ net_mcpcontrol }}
+  pxebr:
+    driver: macvlan
+    driver_opts:
+      parent: veth_mcp1  # Always untagged
+    ipam:
+      config:
+        - subnet: {{ nm.net_admin }}
+  mgmt:
+    driver: macvlan
+    driver_opts:
+{%- if conf.idf.fuel.jumphost.get('trunks', {}).get('mgmt', False) %}
+      parent: {{ ma.interface_str('veth_mcp3', nm.vlan_mgmt) }}
+{%- else %}
+      parent: veth_mcp3  # Untagged by default
+{%- endif %}
+    ipam:
+      config:
+        - subnet: {{ nm.net_mgmt }}

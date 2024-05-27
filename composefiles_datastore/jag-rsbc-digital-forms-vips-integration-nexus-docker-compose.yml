@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  #############################################################################################
+  ###                               Nexus Repository                                        ###
+  #############################################################################################
+  nexus3:
+    image: sonatype/nexus3:3.24.0
+    environment:
+      - NEXUS_CONTEXT=/
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    networks:
+      - rsbc-df-vips-nexus
+
+  #############################################################################################
+  ###                                   NEXUS3 INIT                                         ###
+  #############################################################################################
+  nexus3-init:
+    build:
+      context: ./nexus
+    environment:
+      - NEXUS_ADMIN_USER=${NEXUS_ADMIN_USER}
+      - NEXUS_ADMIN_PASSWORD=${NEXUS_ADMIN_PASSWORD}
+      - NEXUS_URL=${NEXUS_URL}
+    networks:
+      - rsbc-df-vips-nexus
+    volumes:
+      - nexus-data:/nexus-data
+
+volumes:
+  nexus-data:
+
+networks:
+  rsbc-df-vips-nexus:
+    driver: "bridge"

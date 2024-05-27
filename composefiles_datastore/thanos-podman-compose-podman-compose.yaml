@@ -1,0 +1,81 @@
+version: '3.1'
+
+services:
+  minio:
+    hostname: minio
+    image: quay.io/minio/minio:latest
+    command: server /var/minio
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=thanos_user
+      - MINIO_ROOT_PASSWORD=thanos_password
+    volumes:
+      - ./var/minio_data:/var/minio:z
+
+  receiver1:
+    depends_on: [minio]
+    hostname: receiver1
+    image: quay.io/thanos/thanos:v0.30.2
+    command:
+      - receive 
+      - --log.level=debug
+      - --tsdb.path=/var/thanos 
+      - --objstore.config-file=/etc/thanos/object_storage.yml 
+      - '--label=receive_cluster="podman"'
+      - --grpc-address=0.0.0.0:10907
+      - --http-address=0.0.0.0:10909
+      - --receive.replication-factor=1
+      - --receive.local-endpoint=receiver1:10907
+      - --receive.hashrings-file=/etc/thanos/hashring.json
+      - --remote-write.address=0.0.0.0:10908
+    restart: unless-stopped
+    volumes:
+      - ./var/receiver1_data:/var/thanos:z
+      - ./etc/object_storage.yaml:/etc/thanos/object_storage.yml:z
+      - ./etc/hashring.json:/etc/thanos/hashring.json:z
+
+  receiver2:
+    depends_on: [minio]
+    hostname: receiver2
+    image: quay.io/thanos/thanos:v0.30.2
+    command:
+      - receive 
+      - --log.level=debug
+      - --tsdb.path=/var/thanos 
+      - --objstore.config-file=/etc/thanos/object_storage.yml 
+      - '--label=receive_cluster="podman"'
+      - --grpc-address=0.0.0.0:10907
+      - --http-address=0.0.0.0:10909
+      - --receive.replication-factor=1
+      - --receive.local-endpoint=receiver2:10907
+      - --receive.hashrings-file=/etc/thanos/hashring.json
+      - --remote-write.address=0.0.0.0:10908
+    restart: unless-stopped
+    volumes:
+      - ./var/receiver2_data:/var/thanos:z
+      - ./etc/object_storage.yaml:/etc/thanos/object_storage.yml:z
+      - ./etc/hashring.json:/etc/thanos/hashring.json:z
+
+  querier:
+    depends_on: [receiver1, receiver2]
+    hostname: querier
+    image: quay.io/thanos/thanos:v0.30.2
+    command:
+      - query
+      - --log.level=debug
+      - --store=receiver1:10907
+      - --store=receiver2:10907
+      - --http-address=0.0.0.0:19192
+    expose:
+      - 19192
+    ports:
+      - "19192:19192"
+
+  prometheus:
+    depends_on: [receiver1, receiver2]
+    hostname: prometheus
+    image: docker.io/prom/prometheus
+    restart: unless-stopped
+    volumes:
+      - ./etc/prometheus.yaml:/etc/prometheus/prometheus.yml:z
+

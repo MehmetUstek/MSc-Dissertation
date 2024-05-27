@@ -1,0 +1,22 @@
+services:
+  init-public-secrets:
+    extends:
+      file: ./node/compose.yaml
+      service: init
+    volumes:
+      - ./validator-public:/app
+
+  bootnode:
+    extends:
+      file: ./node/compose.yaml
+      service: server
+    ports:
+      - 8545:8545
+      - 1478:1478
+    volumes:
+      - ./testnet-genesis.json:/app/genesis.json
+      - ./validator-bootnode:/app
+    depends_on:
+      init-public-secrets:
+        condition: service_completed_successfully
+

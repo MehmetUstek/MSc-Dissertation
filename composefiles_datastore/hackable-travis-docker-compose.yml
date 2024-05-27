@@ -1,0 +1,17 @@
+test:
+  image: node:6.2.0
+  volumes:
+  - ./:/app
+  - node_modules:/app/node_modules
+  working_dir: /app
+  command: npm run test
+  links:
+  - redis
+  - mongo
+  environment:
+  - MONGODB=mongodb://mongo:27017/hackathon_test
+  - REDIS=redis://redis:6379
+mongo:
+  image: mongo
+redis:
+  image: redis

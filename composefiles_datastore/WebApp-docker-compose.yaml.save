@@ -1,0 +1,45 @@
+version: '3'
+
+volumes:
+  postgres_user_service_data_dev:
+      driver: local
+
+services:
+  fastapi_userservice:
+    container_name: fastapi_userservice
+    build:
+      context: ./
+      # args: 
+      #   TEST: Test
+    image: python 
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_WEBAPP}
+      POSTGRES_USER: ${POSTGRES_USER_WEBAPP}
+      POSTGRES_PASSWORD: ${USER_SERVICE_DB_PASSWORD_WEBAPP}
+      POSTGRES_HOST: ${POSTGRES_HOST_WEBAPP}
+    ports:
+      - 8082:8080
+    networks:
+      - fastapi_dev
+      
+  postgresDB:
+    container_name: user-service-postgres-dev
+    image: postgres:11.12
+    volumes:
+      - postgres_user_service_data_dev:/var/lib/postgresql/data
+    environment:
+    
+      POSTGRES_DB: ${POSTGRES_DB_WEBAPP}
+      POSTGRES_USER: ${POSTGRES_USER_WEBAPP}
+      POSTGRES_PASSWORD: ${USER_SERVICE_DB_PASSWORD_WEBAPP}
+      POSTGRES_HOST: ${POSTGRES_HOST_WEBAPP}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - 5000:5432
+    networks:
+        - fastapi_dev
+
+networks:
+  fastapi_dev:
+    external:
+      name: 

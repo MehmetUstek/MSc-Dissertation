@@ -1,0 +1,79 @@
+version: "3.7"
+services:
+    web:
+        image: ur/web
+        container_name: ur_web
+        restart: always
+        build:
+            context: .
+            dockerfile: ./dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+            - Jwt__Issuer=UserRegistration
+            - Jwt__Audience=UserRegistration
+            - Jwt__SecretKey=xbZk8uHjiLfpcajw0lDuTv4OCYuBHGnTD2Td60KS
+            - ConnectionStrings__UserDatabase=Server=ur_database;Database=UserRegistration;User Id=sa;Password=P4ssW0rd!;TrustServerCertificate=true;
+            - Serilog__WriteTo__1__Args__path=/app/logs/
+        depends_on:
+            - database
+            - elasticsearch
+            - kibana
+            - logstash
+        networks:
+            - ur_network
+        ports:
+            - 8081:80
+    database:
+        image: mcr.microsoft.com/mssql/server
+        container_name: ur_database
+        restart: always
+        environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=P4ssW0rd!
+        networks:
+            - ur_network
+        ports:
+            - 1450:1433
+        volumes:
+            - D:\Git\volumes\mssql:/var/opt/mssql/data
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.12.1
+        container_name: ur_elasticsearch
+        restart: always
+        environment:
+            - discovery.type=single-node
+        ports:
+            - 9200:9200
+            - 9300:9300
+        volumes:
+            - D:\Git\volumes\elasticsearch-data:/usr/share/elasticsearch/data
+        networks:
+            - ur_network
+    logstash:
+        image: docker.elastic.co/logstash/logstash:7.12.0
+        container_name: ur_logstash
+        restart: always
+        ports:
+            - "5000:5000"
+        volumes:
+            -  D:\Git\UserRegistration\logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+        depends_on:
+            - elasticsearch
+        networks:
+            - ur_network
+    kibana:
+        image: docker.elastic.co/kibana/kibana:7.12.1
+        container_name: ur_kibana
+        restart: always
+        ports:
+            - 5601:5601
+        environment:
+            ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+        networks:
+            - ur_network
+    
+networks:
+    ur_network:
+volumes:
+    database:

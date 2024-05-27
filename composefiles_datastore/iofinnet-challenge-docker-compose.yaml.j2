@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+{% for n in range(3) %}
+  minio{{ n+1 }}:
+    image: {{ hostvars[inventory_hostname]['container_image'] }}
+    command: server --console-address ":9001" http://cluster-minio{1...3}-1/data
+    ports:
+      - "{{ hostvars[inventory_hostname]['api_port_prefix'] }}{{ n }}:9000"
+      - "{{ hostvars[inventory_hostname]['console_port_prefix'] }}{{ n }}:9001"
+    volumes:
+      - data{{ n }}:/data
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD_FILE=/run/secrets/minio_password
+      - MINIO_DISTRIBUTED_MODE_ENABLED=yes
+      - MINIO_DISTRIBUTED_NODES=cluster-minio1-1,cluster-minio2-1,cluster-minio3-1
+      - MINIO_SKIP_CLIENT=yes
+      - MINIO_SERVER_URL=http://cluster-minio1-1:{{ hostvars[inventory_hostname]['api_port_prefix'] }}0
+      - MINIO_BROWSER_REDIRECT_URL=http://cluster-minio1-1:{{ hostvars[inventory_hostname]['console_port_prefix'] }}0
+      - TUNING="{{ hostvars[inventory_hostname]['tuning'] }}"
+      - DEBUG="{{ hostvars[inventory_hostname]['debug'] }}"
+      - EXTERNAL_URL="{{ hostvars[inventory_hostname]['external_url'] }}"
+      - CLIENT="{{ hostvars[inventory_hostname]['client'] }}"
+      - INTERACTION_MODE="{{ hostvars[inventory_hostname]['interaction_mode'] }}"
+      - DEVICE_ID="{{ hostvars[inventory_hostname]['device_id'] }}"
+    secrets:
+      - minio_password
+    healthcheck:
+      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      interval: 5s
+      retries: 1
+      start_period: 5s
+      timeout: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '.3'
+          memory: 1G
+{% endfor %}
+
+secrets:
+  minio_password:
+    file: minio_password
+
+volumes:
+{% for n in range(3) %}
+  data{{ n }}:
+{% endfor %}

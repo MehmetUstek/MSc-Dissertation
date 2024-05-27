@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  application:
+    image: "myapp:latest"
+    ports:
+      - "8080:8080"
+    environment:
+      - "SPRING_PROFILES_ACTIVE=dev"
+    depends_on:
+      - "database"

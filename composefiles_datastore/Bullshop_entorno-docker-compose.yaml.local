@@ -1,0 +1,148 @@
+version: '3.9'
+services:
+  #Nginx Service
+  webserver:
+    build:
+      context: ./config/nginx/
+      dockerfile: Dockerfile
+    depends_on:
+      - app-trad
+      - app-cm
+      - app-solicitar
+      - app-emergencias
+      - app-admin
+    volumes:
+      - /Proyectos/traducciones_app/:/var/www/traducciones.psiconnea.com/
+      - /Proyectos/cm_psiconnea/:/var/www/cm.psiconnea.com/
+      - /Proyectos/psiconnea-front/:/var/www/solicitar/
+      - /Proyectos/psiconnea-admin/:/var/www/admin.psiconnea.com/
+      - /Proyectos/psiconnea-emergencias/:/var/www/emergencias.psiconnea.com/
+      - ./config/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./config/nginx/ssh/letsencrypt/:/etc/letsencrypt/
+    command: [ nginx-debug, '-g', 'daemon off;' ]
+    container_name: webserver
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8084:80"
+    networks:
+      vpcGlobal:
+        ipv4_address: 16.5.0.2
+  #PHP TRAD
+  app-trad:
+    build:
+      context: ./config/php/7_4/
+      dockerfile: Dockerfile
+    container_name: app-trad
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - /Proyectos/traducciones_app/:/var/www/traducciones.psiconnea.com/
+      - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      vpcGlobal:
+        ipv4_address: 16.5.0.3
+  #PHP CM
+  app-cm:
+    build:
+      context: ./config/php/8_1/
+      dockerfile: Dockerfile
+    container_name: app-cm
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - /Proyectos/cm_psiconnea/:/var/www/cm.psiconnea.com/
+      - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      vpcGlobal:
+        ipv4_address: 16.5.0.4
+  #PHP EMERGENCIAS
+  app-emergencias:
+    build:
+      context: ./config/php/7_4/
+      dockerfile: Dockerfile
+    container_name: app-emergencias
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - /Proyectos/psiconnea-emergencias/:/var/www/traducciones.psiconnea.com/
+      - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      vpcGlobal:
+        ipv4_address: 16.5.0.5
+  #PHP ADMIN
+  app-admin:
+    build:
+      context: ./config/php/7_4/
+      dockerfile: Dockerfile
+    container_name: app-admin
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - /Proyectos/psiconnea-admin/:/var/www/traducciones.psiconnea.com/
+      - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      vpcGlobal:
+        ipv4_address: 16.5.0.6
+  #NODE FRONT
+  app-solicitar:
+    image: node:alpine
+    container_name: app-solicitar
+    restart: unless-stopped
+    volumes:
+      - /Proyectos/psiconnea-front/:/app
+    working_dir: /app
+    tty: true
+    ports:
+      - "3000:3000"
+    networks:
+      vpcGlobal:
+        ipv4_address: 16.5.0.7
+#Docker Volumes
+volumes:
+  app:
+   driver_opts:
+     type: none
+     device: /Proyectos/traducciones_app/
+     o: bind
+  # cm:
+  #  driver_opts:
+  #    type: none
+  #    device: /Proyectos/cm_psiconnea/
+  #    o: bind
+  # admin:
+  #  driver_opts:
+  #    type: none
+  #    device: /Proyectos/psiconnea-admin/
+  #    o: bind
+  # emergencias:
+  #  driver_opts:
+  #    type: none
+  #    device: /Proyectos/psiconnea-emergencias/
+  #    o: bind
+  # solicitar:
+  #  driver_opts:
+  #    type: none
+  #    device: /Proyectos/psiconnea-front/
+  #    o: bind
+#Docker Networks
+networks:
+  vpcGlobal:
+    name: vpcGlobal
+    external: true

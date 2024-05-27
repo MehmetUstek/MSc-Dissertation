@@ -1,0 +1,19 @@
+services:
+  landing:
+    build:
+      context: landing
+      dockerfile: docker/prod.Dockerfile
+  nginx:
+    image: jonasal/nginx-certbot:4.3.0-nginx1.25.2-alpine
+    env_file:
+      - ./nginx/nginx-certbot.env
+    volumes:
+      - nginx_secrets:/etc/letsencrypt
+      - ./nginx/user_conf.d:/etc/nginx/user_conf.d/
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - landing
+volumes:
+  nginx_secrets:

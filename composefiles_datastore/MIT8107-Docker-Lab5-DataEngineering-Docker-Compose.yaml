@@ -1,0 +1,260 @@
+# Specifies the version of Docker compose that is being used.
+# Then informs Docker compose that what follows is configurations of the
+# services (containers) that form the cluster.
+version: "3"
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.1
+    hostname: zookeeper
+    container_name: zookeeper
+    environment:
+      # Instructs ZooKeeper where to listen for connections by clients
+      ZOOKEEPER_CLIENT_PORT: 2181
+      # `ZOOKEEPER_TICK_TIME` is a configuration parameter that determines the
+      # length of a ZooKeeper tick in milliseconds. The tick is a basic time
+      # unit used by ZooKeeper for various purposes, including:
+      # (1) heartbeats (to detect the liveliness of nodes in the cluster) and
+      # (2) timeouts (If a client does not receive a heartbeat within a certain
+      # multiple of `ZOOKEEPER_TICK_TIME`, it may consider its session as
+      # expired and needs to re-establish a connection)
+      # In this case, it is set to 2000 milliseconds (2 seconds).
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # Confluent Server (cp-server) includes Kafka and role-based access control
+  # (RBAC), self-balancing clusters, and other features. Our interest in this
+  # lab is Kafka.
+  broker:
+    image: confluentinc/cp-server:5.5.1
+    hostname: broker
+    container_name: broker
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      # The Kafka Broker connects to the cluster and informs ZooKeeper of its
+      # presence. This is assuming that ZooKeeper is running on the
+      # container/server called "ZooKeeper" and port 2181. Notice that we can
+      # refer to the container using its container_name instead of its
+      # IP address. Using its IP address can be cumbersome in cases where the
+      # container restarts and is assigned a different dynamic IP address.
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT, PLAINTEXT_HOST:PLAINTEXT
+      # Required for ZooKeeper mode. Describes how the host name that is
+      # advertised can be reached by clients. The value is published to
+      # ZooKeeper for clients to use.
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:29092
+      # This is set to `1` when you are running with a single-node
+      # Kafka cluster. If you have three or more nodes, you can use the
+      # default.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+
+  # The schema registry provides a centralized repository for managing the
+  # schemas used by producers and consumers.
+  # Its primary purpose is to ensure that the data exchanged between different
+  # components of a Kafka system are well-structured, consistent, and follow
+  # a specified schema
+  schema-registry:
+    image: confluentinc/cp-schema-registry:5.5.1
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - zookeeper
+      - broker
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8081'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://broker:9092'
+
+# Required to install all the source and sink connectors as well as the JDBC
+# driver required by the sink connector. This takes several minutes to start
+# depending on the hardware resources available partly because of the
+# installation of the connectors and drivers as the container is created (at
+# runtime). Be patient and wait for the message "Kafka Connect started" in the logs.
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect-base:6.2.0
+    hostname: kafka-connect
+    container_name: kafka-connect
+    depends_on:
+      - broker
+      - schema-registry
+    ports:
+      - 8083:8083
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "broker:9092"
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: kafka-connect
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
+      CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
+    #  *Identifying the correct location of the JDBC drivers is important*
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components,/data/connect-jars
+
+    # If you want to make the installed connectors available offline, then
+    # spin up the stack once and then run : 
+    #   docker cp kafka-connect:/usr/share/confluent-hub-components ./kafka/CONNECT_PLUGIN_PATH
+
+    # volumes:
+      # - ./kafka/data:/data
+      # - ./kafka/CONNECT_PLUGIN_PATH:/usr/share/java
+      # - ./kafka/CONNECT_PLUGIN_PATH:/usr/share/confluent-hub-components
+      # - ./kafka/CONNECT_PLUGIN_PATH:/usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib
+      # - ./kafka/CONNECT_PLUGIN_PATH:/data/connect-jars
+      # - ./kafka/CONNECT_PLUGIN_PATH:/share/java/kafka-connect-jdbc
+      
+    command:
+      - bash
+      - -c
+      - |
+        echo "Installing Connectors"
+        pwd
+        # The commands used are documented here: https://www.confluent.io/hub/
+
+        echo "debezium-connector-mysql:1.7.0"
+        # confluent-hub install --no-prompt debezium/debezium-connector-mysql:1.7.0
+        echo "debezium-connector-mysql:2.2.1"
+        confluent-hub install --no-prompt debezium/debezium-connector-mysql:2.2.1
+        echo "kafka-connect-jdbc:10.7.4"
+        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.7.4
+        echo "clickhouse-kafka-connect:v1.0.5"
+        confluent-hub install --no-prompt clickhouse/clickhouse-kafka-connect:v1.0.5
+        
+        #
+        echo "Installing JDBC Drivers"
+        cd /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib
+        echo "Location of JDBC Driver isntallation is:"
+        pwd
+
+        # Additional drivers are available here on the Maven repository: https://mvnrepository.com/open-source/jdbc-drivers
+        echo "pinot-jdbc-client-1.0.0.jar"
+        curl https://repo1.maven.org/maven2/org/apache/pinot/pinot-jdbc-client/1.0.0/pinot-jdbc-client-1.0.0.jar -o pinot-jdbc-client-1.0.0.jar
+        echo "clickhouse-jdbc-0.5.0.jar"
+        curl https://repo1.maven.org/maven2/com/clickhouse/clickhouse-jdbc/0.5.0/clickhouse-jdbc-0.5.0.jar -o clickhouse-jdbc-0.5.0.jar
+        echo "druid-1.2.20.jar"
+        curl https://repo1.maven.org/maven2/com/alibaba/druid/1.2.20/druid-1.2.20.jar -o druid-1.2.20.jar
+        echo "postgresql-42.6.0.jar"
+        curl https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar -o postgresql-42.6.0.jar
+        echo "jdbc11-23.3.0.23.09.jar"
+        curl https://repo1.maven.org/maven2/com/oracle/database/jdbc/ojdbc11/23.3.0.23.09/ojdbc11-23.3.0.23.09.jar -o jdbc11-23.3.0.23.09.jar
+        
+        rm /usr/share/java/cp-base-new/slf4j-log4j12-*.jar
+        
+        cd /home/appuser
+        #
+
+        #
+        echo "Launching Kafka Connect Worker"
+        /etc/confluent/docker/run &
+        #
+
+        # Let the worker run as long as the server is up
+        sleep infinity
+
+  # Required for a GUI to view the messages in each topic and in each partition
+  # of the topic
+  kafdrop:
+    image: obsidiandynamics/kafdrop:4.0.2-SNAPSHOT
+    container_name: kafdrop
+    depends_on:
+      - broker
+    restart: "no"
+    ports:
+      - 9000:9000
+    environment:
+      KAFKA_BROKERCONNECT: "broker:9092"
+      # JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+      CMD_ARGS: "--message.format=AVRO --schemaregistry.connect=http://schema-registry:8081"
+
+  # Required to provide persistent storage of Kafka topics before being loaded
+  # into the destination. Used to demonstrate the support for real-time analytics.
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:0.29.0
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    depends_on:
+      - broker
+      - schema-registry
+    ports:
+      - 8088:8088
+    environment:
+      KSQL_CONFIG_DIR: "/etc/ksqldb"
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
+      KSQL_BOOTSTRAP_SERVERS: "broker:9092"
+      KSQL_HOST_NAME: ksqldb-server
+      KSQL_LISTENERS: "http://0.0.0.0:8088"
+      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+
+  # Required to provide a CLI to access ksqlDB server.
+  ksqldb-cli:
+    image: confluentinc/ksqldb-cli:0.29.0
+    hostname: ksqldb-cli
+    container_name: ksqldb-cli
+    depends_on:
+      - broker
+      - ksqldb-server
+    entrypoint: /bin/sh
+    environment:
+      KSQL_CONFIG_DIR: "/etc/ksqldb"
+    tty: true
+
+# This can also be a distributed database as shown in the previous lab.
+# It has been implemented as a standalone database (only 1 container)
+# instead of a distributed database like MySQL NDB/InnoDB Cluster (at least 5
+# containers) so that it can be supported by the hardware resources available
+# on a “normal” student laptop).
+
+# Be patient and wait for the server to display "ready for connections" in the
+# logs. There are a total of 4 "ready for connections" messages in the logs.
+
+  mysql:
+    image: mysql:8.0.35
+    hostname: mysql
+    container_name: mysql
+    ports:
+      - 33006:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 5trathm0re
+    volumes:
+      - ./mysql/sample-data:/docker-entrypoint-initdb.d/
+      - ./mysql/var-lib-mysql:/var/lib/mysql
+
+  clickhouse-server:
+    image: yandex/clickhouse-server:21.3.20.1
+    hostname: clickhouse-server
+    container_name: clickhouse-server
+    volumes:
+      - ./clickhouse/config/config.xml:/etc/clickhouse-server/config.xml
+      - ./clickhouse/config/zookeeper-servers.xml:/etc/clickhouse-server/conf.d/zookeeper-servers.xml
+      - ./clickhouse/var-lib-clickhouse:/var/lib/clickhouse
+    ports:
+      - 8123:8123
+      - 9002:9002
+
+  clickhouse-client:
+    image: yandex/clickhouse-client:21.3.20.1
+    hostname: clickhouse-client
+    container_name: clickhouse-client
+    depends_on:
+      - clickhouse-server
+    entrypoint:
+      - /bin/sleep
+    command:
+      - infinity

@@ -1,0 +1,170 @@
+version: "2"
+services:
+  aerospike:
+    image: aerospike:ce-6.4.0.3
+    ports:
+      - "127.0.0.1:3000-3002:3000-3002"
+  couchbase:
+    image: ghcr.io/datadog/couchbase-server-sandbox:latest
+    ports:
+      - "127.0.0.1:8091-8095:8091-8095"
+      - "127.0.0.1:11210:11210"
+  postgres:
+    image: postgres:9.5-alpine
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+  mssql:
+  # A working MSSQL server is not available on ARM.
+  # This image provides _most_ of sqlserver functionalities, but
+  # does not support stored procedures (corresponding tests will fail)
+    image: mcr.microsoft.com/azure-sql-edge
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=DD_HUNTER2"
+    ports:
+      - "127.0.0.1:1433:1433"
+  mysql:
+    image: mariadb:10.4
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=db
+    ports:
+      - "127.0.0.1:3306:3306"
+  redis:
+    image: redis:4.0-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+  mongo:
+    image: circleci/mongo:3.6
+    platform: linux/amd64
+    ports:
+      - "127.0.0.1:27017:27017"
+  oracledb:
+    image: quillbuilduser/oracle-18-xe
+    ports:
+      - '127.0.0.1:1521:1521'
+      - '127.0.0.1:5500:5500'
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
+    ports:
+      - "127.0.0.1:9200:9200"
+  rabbitmq:
+    image: rabbitmq:3.6-alpine
+    ports:
+      - "127.0.0.1:5672:5672"
+  qpid:
+    image: scholzj/qpid-cpp:1.38.0
+    command: -p 5673
+    environment:
+      - QPIDD_ADMIN_USERNAME=admin
+      - QPIDD_ADMIN_PASSWORD=admin
+    ports:
+      - "127.0.0.1:5673:5673"
+  memcached:
+    image: memcached:1.5-alpine
+    ports:
+      - "11211:11211"
+  cassandra:
+    image: spotify/cassandra
+    environment:
+      - CASSANDRA_TOKEN=-9223372036854775808
+    ports:
+      - "127.0.0.1:9042:9042"
+  limitd:
+    image: rochdev/limitd
+    environment:
+      - BUCKET_1_NAME=user
+      - BUCKET_1_SIZE=10
+      - BUCKET_1_PER_SECOND=5
+    ports:
+      - "127.0.0.1:9231:9231"
+  google-cloud-pubsub:
+    image: ghcr.io/ridedott/pubsub-emulator
+    ports:
+      - "127.0.0.1:8081:8081"
+  localstack:
+    image: localstack/localstack:3.0.2
+    ports:
+      - "127.0.0.1:4566:4566" # Edge
+    environment:
+      - LOCALSTACK_SERVICES=dynamodb,kinesis,s3,sqs,sns,redshift,route53,logs,serverless,lambda,stepfunctions,events
+      - EXTRA_CORS_ALLOWED_HEADERS=x-amz-request-id,x-amzn-requestid,x-amz-id-2
+      - EXTRA_CORS_EXPOSE_HEADERS=x-amz-request-id,x-amzn-requestid,x-amz-id-2
+      - AWS_DEFAULT_REGION=us-east-1
+      - FORCE_NONINTERACTIVE=true
+      - START_WEB=0
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  localstack-legacy:
+    # we have two localstacks since upgrading localstack was causing lambda & S3 tests to fail
+    # To-Do: Debug localstack / lambda and localstack / S3
+    image: localstack/localstack:1.1.0
+    ports:
+      - "127.0.0.1:4567:4567" # Edge
+    environment:
+      - LOCALSTACK_SERVICES=dynamodb,kinesis,s3,sqs,sns,redshift,route53,logs,serverless
+      - EXTRA_CORS_ALLOWED_HEADERS=x-amz-request-id,x-amzn-requestid,x-amz-id-2
+      - EXTRA_CORS_EXPOSE_HEADERS=x-amz-request-id,x-amzn-requestid,x-amz-id-2
+      - AWS_DEFAULT_REGION=us-east-1
+      - FORCE_NONINTERACTIVE=true
+      - START_WEB=0
+      - GATEWAY_LISTEN=127.0.0.1:4567
+      - EDGE_PORT=4567
+      - EDGE_PORT_HTTP=4567
+      - LAMBDA_EXECUTOR=local
+  kafka:
+    platform: linux/arm64
+    image: wurstmeister/kafka:2.13-2.8.1
+    ports:
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:9093:9093"
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - NODE_ID=1
+      - CREATE_TOPICS="test-topic:1:1"
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+    depends_on:
+      - zookeeper
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  opensearch:
+    image: opensearchproject/opensearch:2
+    environment:
+      - plugins.security.disabled=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
+    ports:
+      - "127.0.0.1:9201:9200"
+  openldap:
+    image: bitnami/openldap:latest
+    ports:
+      - '127.0.0.1:1389:1389'
+      - '127.0.0.1:1636:1636'
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_USERS=user01,user02
+      - LDAP_PASSWORDS=password1,password2
+
+  testagent:
+    image: ghcr.io/datadog/dd-apm-test-agent/ddapm-test-agent:v1.16.0
+    ports:
+        - "127.0.0.1:9126:9126"
+    environment:
+        - LOG_LEVEL=DEBUG
+        - TRACE_LANGUAGE=javascript
+        - ENABLED_CHECKS=trace_stall,meta_tracer_version_header,trace_count_header,trace_peer_service
+        - PORT=9126

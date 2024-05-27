@@ -1,0 +1,10 @@
+version: '3'
+services:
+  app:
+    image: gallery:dev
+    container_name: gallery
+    ports:
+      - 9000:9000
+    volumes:
+      - ./container:/app/static
+    # tty: true

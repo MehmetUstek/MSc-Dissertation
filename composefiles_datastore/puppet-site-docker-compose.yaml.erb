@@ -1,0 +1,13 @@
+# Web-App
+#
+myapp:
+  #command: -server -bootstrap -advertise 10.0.0.244 -ui-dir /ui
+  #image: tomcat:latest
+  ports:
+   - "8080"
+  build: .
+  volumes:
+   - "/var/run/docker.sock:/tmp/docker.sock"
+  restart: always
+  environment:
+    - "constraint:stage==production"

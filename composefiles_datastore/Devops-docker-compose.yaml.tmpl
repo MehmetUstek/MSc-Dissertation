@@ -1,0 +1,44 @@
+version: "3.0"
+
+services:
+  frontend:
+    image: USERNAME/frontend:submission
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+    - "80:80"
+
+  api-gateway:
+    image: USERNAME/api-gateway:submission
+    build:
+      context: api-gateway
+      dockerfile: Dockerfile
+    ports:
+    - "8080:8080"
+    environment:
+    - LOGIC_API_URL=http://logic-api:5020
+    - FEEDBACK_API_URL=http://feedback-api:5001
+    links:
+    - logic-api
+    - feedback-api
+
+  logic-api:
+    image: USERNAME/logic-api:submission
+    build:
+      context: logic-api
+      dockerfile: Dockerfile
+    ports:
+    - "5020:5020"
+
+  feedback-api:
+    image: USERNAME/feedback-api:submission
+    build:
+      context: feedback-api
+      dockerfile: Dockerfile
+    ports:
+    - "9000:5001"
+    environment:
+    - DATABASE_DIR=/usr/db
+    volumes:
+    - "./feedback-api/Database:/usr/db"

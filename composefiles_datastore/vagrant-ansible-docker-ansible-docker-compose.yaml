@@ -1,0 +1,51 @@
+# lara_docker_compose is a variable name of the playbook
+lara_docker_compose:
+  version: '3'
+  services:
+    command_container:
+      image: alpine
+      command:
+          - /bin/sh
+          - -c
+          - |
+            echo "baeldung"
+            echo "docker"
+    db:
+      image: mysql:8.0
+      cap_add:
+        - SYS_NICE
+      restart: always
+      environment:
+        - MYSQL_DATABASE={{laravel_app_env.DB_DATABASE}}
+        - MYSQL_ROOT_PASSWORD={{ db_root_password }}
+      ports:
+        - '3306:3306'
+      volumes:
+        - db:/var/lib/mysql
+    larasite:
+      image: docker.io/bitnami/laravel:8
+      # container_name: prod_myapp
+      mem_limit: 800M
+      mem_reservation: 128M
+      cpus: 0.8
+      restart: "always"
+      depends_on:
+      - db
+      ports:
+      - '8888:8000'
+      volumes:
+      - '{{app_home}}/:/app'
+      - "{{docker_compose_home}}/logs:/app/storage/logs/"
+        # extra_hosts:
+    larasite_sql_migration:
+      image: docker.io/bitnami/laravel:8
+      mem_limit: 50M
+      cpus: 0.2
+      depends_on:
+      - db
+      command: "php artisan migrate --force"
+      volumes:
+      - '{{app_home}}/:/app'
+  volumes:
+    db:
+      driver: local

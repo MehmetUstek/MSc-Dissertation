@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+
+version: '2.4'
+
+services:
+  neogo{{ neogo__instance }}:
+    image: {{ neogo__docker_image }}
+    container_name: neogo{{ neogo__instance }}
+    hostname: neogo{{ neogo__instance }}
+    network_mode: host
+    stop_signal: SIGKILL
+    user: '{{ getent_passwd[neogo__user][1] }}:{{ getent_group[neogo__user][1] }}'
+    entrypoint: /usr/bin/neo-go
+    command: node --config-path {{ neogo__conf_dir }} --{{ neogo__network }}
+    volumes:
+    - {{ neogo__data_dir }}:{{ neogo__data_dir }}
+    - {{ neogo__conf_dir }}:{{ neogo__conf_dir }}

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  nestjs:
+    container_name: slot_nest
+    build:
+      context: .
+      dockerfile: nest.dockerfile
+    ports:
+      - "6061:3004"
+    depends_on:
+      - mongo
+    env_file:
+      - .env.prod
+    networks:
+      - slot_network
+
+  mongo:
+    image: mongo
+    container_name: slot_mongo
+    build:
+      context: .
+      dockerfile: mongo.dockerfile
+    ports:
+      - "6060:27017"
+    env_file:
+      - .env.prod
+    networks:
+      - slot_network
+
+networks:
+  slot_network:
+    driver: bridge

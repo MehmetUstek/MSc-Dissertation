@@ -1,0 +1,15 @@
+version: "3"
+
+volumes:
+  pgdata:
+
+services:
+  postgres:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=aso
+      - POSTGRES_PASSWORD=aso
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432

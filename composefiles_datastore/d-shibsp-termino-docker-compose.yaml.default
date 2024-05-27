@@ -1,0 +1,33 @@
+version: "3"
+services:
+  shibsp:
+    build:
+      context: .
+    image: r2h2/shibsp-termino
+    container_name: termino
+    hostname: termino
+    restart: unless-stopped
+    environment:
+        - SHIBDUSER=shibd
+        - HTTPDUSER=httpd
+        - LOGPURGEFILES
+    network_mode: host
+    #ports:
+    #    - "8081:8081"
+    volumes:
+        - /opt/dv/shibsp.etc_httpd_conf:/etc/httpd/conf:Z
+        - /opt/dv/shibsp.etc_httpd_conf.d:/etc/httpd/conf.d
+        - /opt/dv/shibsp.etc_shibboleth:/etc/shibboleth:Z
+        - /opt/dv/shibsp.etc_shibboleth-ds:/etc/shibboleth-ds:Z
+        - /opt/dv/shibsp.opt_etc:/opt/etc:Z
+        - /opt/dv/shibsp.run_httpd:/run/httpd:Z
+        - /opt/dv/shibsp.var_log:/var/log:Z
+        - /opt/dv/shibsp.var_www:/var/www:Z
+    cap_drop:
+      - ALL
+    cap_add:
+      - dac_override
+      - setuid
+      - setgid
+      - chown
+      - net_raw

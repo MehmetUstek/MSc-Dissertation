@@ -1,0 +1,54 @@
+version: "3"
+services:
+  db:
+    container_name: db
+    image: postgres
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - "6379:6379"
+  server:
+    build: .
+    ports:
+      - "3000:3000"
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: auth_db
+      DB_PORT: 5432
+      NODE_ENV: docker
+      SECRET: secret
+
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile.migration
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: auth_db
+      DB_PORT: 5432
+      NODE_ENV: migration

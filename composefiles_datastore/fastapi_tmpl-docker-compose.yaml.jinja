@@ -1,0 +1,46 @@
+version: "3"
+services:
+  {{ item.customer_code }}_oemes_service:
+    container_name: {{ item.customer_code }}_oemes
+    image: ghcr.io/ethermeta-org/onesphere:{{ item.version or latest }}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "20"
+    ports:
+      - {{ item['service_port'] or 8069 }}:8069
+    volumes:
+      - /data/onesphere/data:/var/lib/odoo
+      - ./odoo.conf:/etc/odoo/odoo.conf
+    restart: "always"
+    entrypoint: ["odoo","--load","base,web,oneshare_odoo_modify,smile_redis_session_store,l10n_cn_city","-i", "onesphere_auth_device","--proxy-mode","--limit-time-cpu","3600","--limit-time-real", "3600","--no-database-list","--limit-time-real-cron", "0","--workers","8","--without-demo","all", "--load-language", "zh_CN"]
+    environment:
+      - ODOO_HTTP_SOCKET_TIMEOUT=20
+      - ENV_TIMESCALE_ENABLE=true
+      - ENV_REDIS_ENABLE=false
+      - ENV_REDIS_HOST=sh-crs-jgrkgsxb.sql.tencentcdb.com
+      - ENV_REDIS_PORT=24776
+      - ENV_REDIS_DB=1
+      - ENV_REDIS_PASSWORD=alano+1234567
+      - ENV_RUNTIME_ENV=prod
+      - ENV_GITHUB_ACCESS_TOKEN=12345
+      - ENV_GITHUB_OWNER=masami10
+      - ENV_SERVICE_EXTRA_HTTP_ENABLE=true
+      - ENV_DOCKER_URL=unix://var/run/docker.sock
+      - ENV_COLLECTION_DEFAULT_TAG=v2.1.1
+      - ENV_BACKUP_WITH_MINIO=true # 将minio内数据一同备份
+      - ENV_OSS_BUCKET=curves
+      - ENV_SERVICE_FASTAPI_ENABLE=true # v2接口服务
+      - ENV_MQTT_ENABLE=true # MQTT服务
+      - ENV_MQTT_BROKER_HOST=host.docker.internal # MQTT broker ip
+      - ENV_MQTT_HOST_APP_NAME=onesphere # MQTT主应用名称
+      - ENV_MQTT_SYNC_EQUIP_WITH_LOCATION=false
+      - ENV_MQTT_BROKER_TYPE=local
+    deploy:
+      resources:
+        limits:
+          cpus: {%- if item['is_demo'] -%}'0.8'{% else %} '{{ item['cpu_percent'] or '2.0' }}' {% endif %}
+          memory: {%- if item['is_demo'] -%}300M{% else %} {{ item['mem_limit'] or '1000M' }} {% endif %}

@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  coreDNS:
+    image: coredns/coredns
+    restart: always
+    ports:
+      - 53:53/udp
+    volumes:
+      - /media/butt/Arquivos/Docker/coreDNS/:/root/
+    command: --log-facility=-
+networks:
+  default:
+    external:
+      name: host

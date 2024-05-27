@@ -1,0 +1,18 @@
+services:
+  kindle_server:
+    image: ghcr.io/bruhtek/kindle-dashboard-v3:latest
+    ports:
+      - "5000:5000"
+		environment:
+       # Calendar (CalDAV)
+			- CALDAV_URL='https://cloud.example.com/remote.php/dav'
+      - CALDAV_USERNAME=Username
+      - CALDAV_PASSWORD=Your-app-password
+        # 1 - Monday, 0 - Sunday
+      - START_OF_WEEK=0
+        # Weather
+      - METNO_LATITUDE=59.9333
+      - METNO_LONGITUDE=10.7166
+      - METNO_USER_AGENT='Kindle Dashboard (you@example.com)'
+      - TZ=Europe/Oslo
+    restart: unless-stopped

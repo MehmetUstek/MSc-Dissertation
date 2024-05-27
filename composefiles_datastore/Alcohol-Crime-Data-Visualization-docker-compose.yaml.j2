@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  couchdb:
+    image: couchdb
+    restart: always
+    ports:
+      - "5984:5984"
+    volumes:
+      - /mnt:/opt/couchdb/data
+    environment:
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: password
+
+  mastodon:
+    image: taytang91/mastodon_sentiment
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      SERVER_URL: "https://mastodon.au"
+      TOKEN: "None"
+      DATABASE_IP: "{{ database_ip }}"
+      DATABASE_PORT: "5984"
+      DATABASE_USER: "admin"
+      DATABASE_PASSWORD: "password"
+      DATABASE_NAME: "mastodon_data"

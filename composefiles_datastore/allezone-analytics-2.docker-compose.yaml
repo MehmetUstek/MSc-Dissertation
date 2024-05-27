@@ -1,0 +1,78 @@
+version: "3.9"
+services:
+
+  gateway:
+    image: st118vm101.rtb-lab.pl/gateway:debug
+    env_file: .env
+    networks:
+      - aerospikenetwork
+      - kafkanetwork
+      - postgresnetwork
+      - prometheusnetwork
+    ports:
+      - "8088:8088"
+  
+    deploy:
+      replicas: 2
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - node.labels.service == gateway
+
+  
+  pipeline:
+    image: st118vm101.rtb-lab.pl/pipeline:latest
+    env_file: .env
+    networks:
+      - kafkanetwork
+      - postgresnetwork
+    deploy:
+      replicas: 2
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - node.labels.service == pipeline
+
+  prometheus:
+    image: prom/prometheus
+    deploy:
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+    networks:
+      - prometheusnetwork
+    ports:
+      - "9090:9090"
+    secrets:
+      - source: scrape_config
+        target: /etc/prometheus/prometheus.yml
+        mode: 0777
+
+  grafana:
+    image: grafana/grafana-oss
+    deploy:
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+    networks:
+      - prometheusnetwork
+    ports:
+      - "3000:3000"
+
+networks:
+  aerospikenetwork:
+    driver: overlay
+    attachable: true
+  kafkanetwork:
+    driver: overlay
+    attachable: true
+  postgresnetwork:
+    driver: overlay
+    attachable: true
+  prometheusnetwork:
+    driver: overlay
+    attachable: true
+
+secrets:
+  scrape_config:
+    file: ./services/prometheus/prometheus.yml

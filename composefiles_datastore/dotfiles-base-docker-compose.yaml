@@ -1,0 +1,33 @@
+version: '3.8'
+
+x-var: &COMMON
+  networks:
+    internal:
+
+networks:
+  internal:
+    # name: internal
+    # external: true
+
+services:
+  {{_input_:service}}:
+    <<: *COMMON
+    build: .
+    image: {{_input_:service}}:1
+    container_name: {{_input_:service}}
+    hostname: {{_input_:service}}
+    # ports:
+    #   - 12345:12345
+    # volumes:
+    #   - .:/src
+    # environment:
+    #   TERM: $TERM
+    # restart: always
+    # tty: true
+    # entrypoint:
+    #   - /sbin/tini
+    #   - --
+    # command:
+    #   - tail
+    #   - -f
+    #   - /dev/null

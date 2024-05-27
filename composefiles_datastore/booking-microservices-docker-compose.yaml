@@ -1,0 +1,353 @@
+version: "3.3"
+services:
+
+   #######################################################
+   #  Postgres
+   ######################################################
+  postgres:
+   image: postgres:latest
+   container_name: postgres
+   restart: unless-stopped
+   ports:
+     - '5432:5432'
+   environment:
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=postgres
+   command:
+     - "postgres"
+     - "-c"
+     - "wal_level=logical"
+     - "-c"
+     - "max_prepared_transactions=10"
+   networks:
+     - booking
+
+
+
+    #######################################################
+    #  SqlServer
+    #######################################################
+    # sql:
+    #   container_name: sql
+    #   image: mcr.microsoft.com/mssql/server
+    #   restart: unless-stopped
+    #   ports:
+    #     - "1433:1433"
+    #   environment:
+    #     SA_PASSWORD: "Password@1234"
+    #     ACCEPT_EULA: "Y"
+
+
+    #######################################################
+    #  Rabbitmq
+    #######################################################
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    restart: unless-stopped
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - booking
+
+
+    #######################################################
+    #  Jaeger
+    #######################################################
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger
+    restart: unless-stopped
+    networks:
+      - booking
+    ports:
+      - 5775:5775/udp
+      - 5778:5778
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 9411:9411
+      - 14268:14268
+      - 16686:16686
+
+
+    #######################################################
+    #  EventStoreDB
+    #######################################################
+  eventstore:
+    container_name: eventstore
+    image: eventstore/eventstore:latest
+    restart: unless-stopped
+    environment:
+      - EVENTSTORE_CLUSTER_SIZE=1
+      - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+      - EVENTSTORE_EXT_TCP_PORT=1113
+      - EVENTSTORE_EXT_HTTP_PORT=2113
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+    ports:
+      - '1113:1113'
+      - '2113:2113'
+    networks:
+      - booking
+
+
+    #######################################################
+    #  Mongo
+    #######################################################
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=root
+    #   - MONGO_INITDB_ROOT_PASSWORD=secret
+    networks:
+      - booking
+    ports:
+      - 27017:27017
+
+    #######################################################
+    #  Elastic Search
+    #######################################################
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:7.17.9
+    restart: unless-stopped
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - xpack.monitoring.enabled=true
+      - xpack.watcher.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+    networks:
+      - booking
+
+    #######################################################
+    #  Kibana
+    #######################################################
+  kibana:
+    container_name: kibana
+    image: kibana:7.17.9
+    restart: unless-stopped
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=elasticsearch:9200
+    networks:
+      - booking
+
+    #######################################################
+    # prometheus
+    #######################################################
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./monitoring/prom/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - booking
+
+    #######################################################
+    # grafana
+    #######################################################
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana-data/data:/var/lib/grafana
+    networks:
+      - booking        
+
+    #######################################################
+    # node_exporter
+    #######################################################
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - booking   
+
+    #######################################################
+    # cadvisor
+    #######################################################
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - booking
+      
+  ######################################################
+  #  Gateway
+  ######################################################
+  gateway:
+    image: gateway
+    build:
+      args:
+        Version: "1"
+      context: ../../
+      dockerfile: src/ApiGateway/dev.Dockerfile
+    container_name: gateway
+    ports:
+      - "5001:80"
+      - "5000:443"
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=docker
+      - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_HTTPS_PORT=5000
+      - ASPNETCORE_HTTP_PORT=5001
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    networks:
+      - booking
+
+
+    #######################################################
+    #  Flight
+    #######################################################
+  flight:
+    image: flight
+    build:
+      args:
+        Version: "1"
+      context: ../../
+      dockerfile: src/Services/Flight/dev.Dockerfile
+    container_name: flight
+    ports:
+      - 5004:80
+      - 5003:443
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=docker
+      - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_HTTPS_PORT=5003
+      - ASPNETCORE_HTTP_PORT=5004
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    networks:
+      - booking
+
+    #######################################################
+    #  Identity
+    #######################################################
+  identity:
+    image: identity
+    build:
+      args:
+        Version: "1"
+      context: ../../
+      dockerfile: src/Services/Identity/dev.Dockerfile
+    container_name: identity
+    ports:
+      - 6005:80
+      - 5005:443
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=docker
+      - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_HTTPS_PORT=5005
+      - ASPNETCORE_HTTP_PORT=6005
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    networks:
+      - booking
+
+
+    #######################################################
+    #  Passenger
+    #######################################################
+  passenger:
+    image: passenger
+    build:
+      args:
+        Version: "1"
+      context: ../../
+      dockerfile: src/Services/Passenger/dev.Dockerfile
+    container_name: passenger
+    ports:
+      - 6012:80
+      - 5012:443
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=docker
+      - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_HTTPS_PORT=5012
+      - ASPNETCORE_HTTP_PORT=6012
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    networks:
+      - booking
+
+
+    #######################################################
+    #  Booking
+    #######################################################
+  booking:
+    image: booking
+    build:
+      args:
+        Version: "1"
+      context: ../../
+      dockerfile: src/Services/Booking/dev.Dockerfile
+    container_name: booking
+    ports:
+      - 6010:80
+      - 5010:443
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=docker
+      - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_HTTPS_PORT=5010
+      - ASPNETCORE_HTTP_PORT=6010
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    networks:
+      - booking
+
+
+networks:
+  booking:
+
+volumes:
+  elasticsearch-data:
+
+
+

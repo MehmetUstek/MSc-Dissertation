@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  pocketbase:
+    profiles:
+      - db
+    container_name: pocketbase
+    build:
+      context: .
+      dockerfile: docker/pocketbase.Dockerfile
+    volumes:
+      - pocketbase-data:/pb/pb_data
+      - ./migrations:/pb/pb_migrations
+    ports:
+      - "8080:8080"
+
+  redis:
+    profiles:
+      - db
+    container_name: redis
+    image: redis:7.2.3-alpine
+    restart: always
+    volumes:
+      - redis_data:/var/lib/redis/data/
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+
+  qdrant:
+    profiles:
+      - db
+    container_name: qdrant
+    image: qdrant/qdrant:v1.7.3
+    restart: always
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - "6333:6333"
+
+  workers:
+    profiles:
+      - api
+    restart: on-failure
+    container_name: workers
+    build:
+      context: .
+      dockerfile: docker/python.Dockerfile
+      target: workers
+    command: ["dramatiq", "workers.app", "--watch", "/app/"]
+    volumes:
+      - ./core:/app/core
+      - ./workers:/app/workers
+      - ./config.yaml:/app/config.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - pocketbase
+      - qdrant
+
+  api:
+    profiles:
+      - api
+    container_name: api
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: docker/python.Dockerfile
+      target: api
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: "uvicorn api.main:app --proxy-headers --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./api:/app/api
+      - ./core:/app/core
+      - ./workers:/app/workers
+      - ./config.yaml:/app/config.yaml
+    depends_on:
+      - pocketbase
+      - qdrant
+
+volumes:
+  pocketbase-data:
+  redis_data:
+  qdrant_data:
+  pgdata:

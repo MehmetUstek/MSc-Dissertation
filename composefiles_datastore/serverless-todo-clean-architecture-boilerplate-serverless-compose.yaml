@@ -1,0 +1,23 @@
+services:
+
+  infra:
+    path: infra
+    params:
+      region: ${env:AWS_REGION, 'eu-west-1'}
+  api:
+    path: api
+    dependsOn:
+      - infra
+    params:
+      region: ${env:AWS_REGION, 'eu-west-1'}
+      # cognito
+      userPoolName: ${infra.userPoolName}
+      userPoolId: ${infra.userPoolId}
+      userPoolArn: ${infra.userPoolArn}
+      appClientId: ${infra.appClientId}
+      # dynamodb
+      todosTableName: ${infra.todosTableName}
+      todosTableArn: ${infra.todosTableArn}
+      usersTableName: ${infra.usersTableName}
+      usersTableArn: ${infra.usersTableArn}
+      usersTableStreamArn: ${infra.usersTableStreamArn}

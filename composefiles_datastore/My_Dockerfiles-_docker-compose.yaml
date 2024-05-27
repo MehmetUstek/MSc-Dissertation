@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+  db:
+    build: ../db/postgres/images
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - 5432:5432
+  webserver:
+    build: ./
+    restart: always
+    volumes: 
+      - ./app:/app
+    ports: 
+      - 8080:80

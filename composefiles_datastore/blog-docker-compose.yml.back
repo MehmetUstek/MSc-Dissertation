@@ -1,0 +1,10 @@
+app:
+  image: blog
+  extra_hosts:
+  - mongodb:1.1.1.1
+#  volumes:
+#  - .:/data
+  command: node /data/app.js
+  environment:
+    VIRTUAL_HOST: "blog.com"
+    MONGODB: mongodb://mongodb:27017/blog

@@ -1,0 +1,33 @@
+version: "3"
+services:
+  server:
+    build: ./server
+    container_name: server
+    deploy:
+      resources:
+        limits:
+          memory: 8gb
+    ports:
+      - 5001:5001
+      - 6006:6006
+    environment:
+      - DATA_DIR=/data
+      - PORT=5001
+      - TENSORBOARD_PORT=6006
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+        bind:
+          create_host_path: true
+    restart: on-failure
+
+  client:
+    build: ./client
+    container_name: client
+    ports:
+      - 3000:3000
+    environment:
+      - SERVER_PORT=5001
+      - TENSORBOARD_PORT=6006
+    restart: on-failure

@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  blenderpy-manylinux-wheel-builder:
+    build:
+      context: .
+      dockerfile: ./.containers/Dockerfile
+      target: blenderpy-manylinux-wheel-builder
+    command: bash -c "/blenderpy/.vscode/tasks/Docker/manylinux/build.sh && /blenderpy/.vscode/tasks/Docker/manylinux/build_wheels.sh"
+    container_name: blenderpy-manylinux-wheel-builder
+    volumes: 
+      - ./Blender/build:/build
+      - ./Blender:/Blender:delegated
+      - ./dist:/blenderpy/dist:delegated
+  blenderpy-windows-wheel-builder:
+    build:
+      context: .
+      dockerfile: ./.containers/Dockerfile
+      target: blenderpy-windows-wheel-builder
+    command: bash -c "/blenderpy/.vscode/tasks/Docker/windows/build.sh && /blenderpy/.vscode/tasks/Docker/windows/build_wheels.sh"
+    container_name: blenderpy-windows-wheel-builder
+    volumes: 
+      - ./Blender/build:/build
+      - ./Blender:/Blender:delegated
+      - ./dist:/blenderpy/dist:delegated

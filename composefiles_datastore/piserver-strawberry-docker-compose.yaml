@@ -1,0 +1,62 @@
+services:
+ dashboard:
+   image: helblingjoel/piserver:20230612
+   container_name: dashboard
+   ports:
+     - "80:3000"
+   restart: unless-stopped
+   environment:
+     DATABASE_URL: ""
+     OCTOPUS_ACCOUNT_NUMBER: ""
+     TZ: "Europe/London"
+     OCTOPUS_API_KEY: ""
+     OCTOPUS_ELECTRIC_MPAN: ""
+     OCTOPUS_ELECTRIC_SERIAL: ""
+     OCTOPUS_GAS_MPRN: ""
+     OCTOPUS_GAS_SERIAL: ""
+     MOVE_IN_DATE: ""
+     ADDRESS_CODE: ""
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "1234:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    hostname: pihole
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "81:80/tcp"
+      - "443:443/tcp"
+    environment:
+      TZ: "Europe/London"
+    volumes:
+      - "pihole-data:/etc/pihole/"
+      - "pihole-dns:/etc/dnsmasq.d/"
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+
+  castblock:
+    image: erdnaxeli/castblock
+    container_name: castblock
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - MUTE_ADS=true
+
+volumes:
+  portainer_data:
+  pihole-data:
+  pihole-dns:

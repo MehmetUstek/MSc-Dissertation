@@ -1,0 +1,120 @@
+version: "3.9"
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx
+    ports:
+      - '443:443'
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./compose/certificates:/etc/nginx/certs:ro
+      - ./compose/proxy.conf:/etc/nginx/conf.d/customproxy.conf:ro
+    networks:
+      proxy_net:
+        aliases:
+          - idserver.localhost.com
+          - scim.localhost.com
+          - website.localhost.com
+          - credentialissuer.localhost.com
+          - credentialissuerwebsite.localhost.com
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    volumes:
+     - mssqldata:/var/opt/mssql
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD : "D54DE7hHpkG9"
+    networks:
+      proxy_net: null
+  scim:
+    build:
+      context: .
+      dockerfile: ./ScimDockerFile
+    image: simpleidserver/scim:${TAG}
+    environment:
+      VIRTUAL_HOST: "scim.localhost.com"
+      ASPNETCORE_URLS : "http://*:80"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      StorageConfiguration__Type: "SQLSERVER"
+      StorageConfiguration__ConnectionString: "Data Source=db;Initial Catalog=Scim;TrustServerCertificate=True;User=sa;Password=D54DE7hHpkG9;"
+    depends_on:
+      - db
+    networks:
+      proxy_net: null
+  idserver:
+    build:
+      context: .
+      dockerfile: ./IdServer
+    image: simpleidserver/idserver:${TAG}
+    environment:
+      VIRTUAL_HOST: "idserver.localhost.com"
+      ASPNETCORE_URLS : "http://*:80"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      DistributedCacheConfiguration__Type: "SQLSERVER"
+      StorageConfiguration__Type: "SQLSERVER"
+      DistributedCacheConfiguration__ConnectionString: "Data Source=db;Initial Catalog=IdServer;TrustServerCertificate=True;User=sa;Password=D54DE7hHpkG9;"
+      StorageConfiguration__ConnectionString: "Data Source=db;Initial Catalog=IdServer;TrustServerCertificate=True;User=sa;Password=D54DE7hHpkG9;"
+      SCIMBaseUrl: "https://scim.localhost.com"
+      Authority: "https://idserver.localhost.com"
+      SCIM__SCIMRepresentationsExtractionJobOptions__SCIMEdp: "https://scim.localhost.com"
+    depends_on:
+      - db
+      - scim
+    networks:
+      proxy_net: null
+  website:
+    build:
+      context: .
+      dockerfile: ./IdServerWebsite
+    image: simpleidserver/website:${TAG}
+    environment:
+      VIRTUAL_HOST: "website.localhost.com"
+      ASPNETCORE_URLS : "http://*:80"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      DefaultSecurityOptions__Issuer: "https://idserver.localhost.com/master"
+      DefaultSecurityOptions__IgnoreCertificateError: "true"
+      IdServerBaseUrl: "https://idserver.localhost.com"
+      ScimBaseUrl: "https://scim.localhost.com"
+    depends_on:
+      - idserver
+      - scim
+    networks:
+      proxy_net: null
+  credentialissuer:
+    build:
+      context: .
+      dockerfile: ./CredentialIssuer
+    image: simpleidserver/credentialissuer:${TAG}
+    environment:
+      VIRTUAL_HOST: "credentialissuer.localhost.com"
+      ASPNETCORE_URLS : "http://*:80"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      Authorization__Issuer: "https://idserver.localhost.com/master"
+      Authorization__IgnoreCertificateError: "true"
+    depends_on:
+      - idserver
+    networks:
+      proxy_net: null
+  credentialissuerwebsite:
+    build:
+      context: .
+      dockerfile: ./CredentialIssuerWebsite
+    image: simpleidserver/credentialissuerwebsite:${TAG}
+    environment:
+      VIRTUAL_HOST: "credentialissuerwebsite.localhost.com"
+      ASPNETCORE_URLS : "http://*:80"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      CredentialIssuerUrl: "https://credentialissuer.localhost.com"
+      DefaultSecurityOptions__Issuer: "https://idserver.localhost.com/master"
+      DefaultSecurityOptions__IgnoreCertificateError: "true"
+    depends_on:
+      - idserver
+      - credentialissuer
+    networks:
+      proxy_net: null
+networks:
+  proxy_net:
+    driver: bridge
+volumes:
+  mssqldata:

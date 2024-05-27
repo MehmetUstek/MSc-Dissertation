@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+
+  # Requires the build of the stubs first
+  grpc-server:
+    #image: envoyproxy/envoy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9093:9093"
+    tty: true
+    networks:
+      envoymesh:
+        aliases:
+          - backend-service-jim
+
+  grpc-server-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile-proxy
+    networks:
+      envoymesh:
+        aliases:
+          - backend-proxy-jim
+    ports:
+      - "8811:8811"
+      - "9901:9901"
+
+networks:
+  envoymesh: { }

@@ -1,0 +1,33 @@
+version: "3.2"
+
+services:
+
+    kafka:
+        image:
+            "confluentinc/cp-kafka:5.4.0"
+        network_mode: host
+        restart:
+            "no"
+        environment:
+            ZOOKEEPER_SASL_ENABLED: "false"
+            KAFKA_LISTENERS: "SASL_PLAINTEXT://0.0.0.0:9092,PLAINTEXT://0.0.0.0:80"
+            KAFKA_ADVERTISED_LISTENERS: "SASL_PLAINTEXT://{{ inventory_hostname }}:9092,PLAINTEXT://{{ public_hostname }}.{{ domain }}:80"
+            KAFKA_INTER_BROKER_LISTENER_NAME: "SASL_PLAINTEXT"
+            KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-256"
+            KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
+            KAFKA_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
+            KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+            KAFKA_SUPER_USERS: "User:admin"
+            KAFKA_LOG_DIRS: "{{ logpath }}"
+            KAFKA_ZOOKEEPER_CONNECT: "{{ groups['zookeepers'] | join(',') }}"
+            KAFKA_NUM_PARTITIONS: "{{ num_partitions }}"
+            KAFKA_DEFAULT_REPLICATION_FACTOR: "1"
+            KAFKA_LOG_RETENTION_MS: "{{ retention_ms }}"
+            KAFKA_LOG_RETENTION_BYTES: "{{ retention_bytes }}"
+            KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+            KAFKA_MESSAGE_MAX_BYTES: "10485760"
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+            KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka_server_jaas.conf"
+        volumes:
+            - /etc/kafka_server_jaas.conf:/etc/kafka_server_jaas.conf
+

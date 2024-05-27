@@ -1,0 +1,77 @@
+version: "3.8"
+x-logging: &lokilogs
+  logging:
+    driver: loki
+    options:
+      loki-url: "http://192.168.0.40:3100/loki/api/v1/push"
+
+services:
+  web:
+    image: sreeramb93/demo-server:${GITCOMMIT}
+    build:
+      context: ./server
+      dockerfile: Dockerfile.new
+      args:
+        - "GITCOMMIT=${GITCOMMIT}"
+    networks:
+      overlay:
+        ipv4_address: ${DEMO_SERVER_IP}
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://192.168.0.40:3100/loki/api/v1/push"
+        loki-pipeline-stages: |
+          - drop:
+              expression: ".*haproxy-check.*"
+    volumes:
+      - ./server:/app # modified here to take into account the new app path
+    depends_on:
+      - cache
+      - db
+    links:
+      - cache
+      - db
+  cache:
+    image: redis
+    networks:
+      - overlay
+  db:
+    image: mysql
+    networks:
+      - overlay
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: demo
+      MYSQL_USER: sreeram
+      MYSQL_PASSWORD: adelaide7092
+    volumes:
+      - db-data:/var/lib/mysql/
+  haproxy:
+    image: sreeramb93/ha-proxy:2.2.4
+    build:
+      context: ./haproxy
+      dockerfile: Dockerfile
+    networks:
+      overlay:
+        ipv4_address: ${HA_PROXY_IP}
+    ports:
+      - "8081:8081"
+      - "9999:9999"
+    environment:
+      - DEMO_SERVER_IP=${DEMO_SERVER_IP}
+      - DEMO_SERVER_PORT=${DEMO_SERVER_PORT}
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - web
+
+volumes:
+  db-data:
+
+networks:
+  overlay:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NETWORK_SUBNET}

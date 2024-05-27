@@ -1,0 +1,24 @@
+services:
+  trino:
+    container_name: trino
+    image: trinodb/trino:420
+    environment:
+    # PODMAN_xxx is custom variable to staging between .env and .properties of Trino
+    ## Setting for OMOP connection
+      - PODMAN_CONN_OMOP_USER=${OMOP_PG_USER}
+      - PODMAN_CONN_OMOP_PASSWORD=${OMOP_PG_PW}
+      - PODMAN_CONN_OMOP_DB=${OMOP_PG_DB}
+      - PODMAN_EXPOSE_PORT=${TRINO_EXPOSE_PORT}
+    ports:
+      - "${TRINO_EXPOSE_PORT}:8080" # Chaging port have an affect to Trino config.properties
+    restart: always
+    volumes: 
+      # - ../dwh/trino/etc/:/etc/trino
+      - ./src/trino/etc/:/etc/trino
+    networks:
+      - omop-cloudbuild
+
+networks:
+  omop-cloudbuild:
+    external: true
+    name: omop-cloudbuild # Needed for Continuous integration

@@ -1,0 +1,40 @@
+version: '3.1'
+
+services:
+  traefik:
+    image: traefik:v1.2.0-rc2
+    command:
+      - '--loglevel=DEBUG'
+      - '--docker'
+      - '--docker.swarmmode'
+      - '--docker.exposedbydefault=false'
+      - '--entrypoints=Name:http Address::80'
+      - '--entrypoints=Name:https Address::443 TLS:/run/secrets/tls.cert,/run/secrets/tls.key'
+      - '--defaultentrypoints=http,https'
+      - '--web'
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8080:8080'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik
+    secrets:
+      - tls.cert
+      - tls.key
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+
+secrets:
+  tls.cert:
+    file: ./traefik/localhost.crt
+  tls.key:
+    file: ./traefik/localhost.key
+
+networks:
+  traefik:
+    external: true

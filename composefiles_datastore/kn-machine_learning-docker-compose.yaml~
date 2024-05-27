@@ -1,0 +1,35 @@
+version: '3'
+services:
+  postgresql:
+    image: postgres:10.5
+    container_name: postgresql
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: mlflow-db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    hostname: postgresql
+    restart: always
+
+  mlflow:
+    build:
+      
+    container_name: mlflow
+    expose:
+      - 80
+      - 443
+    depends_on:
+      - postgresql
+    volumes:
+      - ${CREDENTIALS_PATH}:/opt/application_default_credentials.json
+    environment:
+      DB_URI: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:5432/mlflow-db
+      GCP_STORAGE_BUCKET: "${GCP_STORAGE_BUCKET}"
+      VIRTUAL_HOST: ${HOST}
+      VIRTUAL_PORT: 80
+      LETSENCRYPT_HOST: ${HOST}
+      LETSENCRYPT_EMAIL: example@gmail.com
+      GOOGLE_APPLICATION_CREDENTIALS: /opt/application_default_credentials.json
+      GCLOUD_PROJECT: ${GCLOUD_PROJECT}

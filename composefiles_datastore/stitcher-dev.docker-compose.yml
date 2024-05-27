@@ -1,0 +1,12 @@
+version: '3'
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    volumes:
+      - .:/opt/stitcher
+      - ../stitcher-data-inxight:/opt/stitcher-data-inxight
+    ports:
+      - "9003:9003"
+    tty: true

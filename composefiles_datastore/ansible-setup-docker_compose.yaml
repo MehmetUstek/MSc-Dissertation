@@ -1,0 +1,20 @@
+---
+# TODO figure out how to do this correctly
+#- name: "Downloading docker-compose from https://github.com/docker/compose/releases/download/{{ docker_compose.version }}/docker-compose-Linux-{{ ansible_machine }}"
+#  get_url:
+#    url: "https://github.com/docker/compose/releases/download/{{ docker_compose.version }}/docker-compose-Linux-{{ ansible_machine }}"
+#    dest: /usr/local/bin/docker-compose
+#    mode: +x
+
+- name: Install libffi-dev libssl-dev
+  apt:
+    name:
+      - libffi-dev
+      - libssl-dev
+    state: latest
+    install_recommends: no
+    update_cache: yes
+
+- name: "Pip install docker-compose=={{ docker_compose.version }}"
+  pip:
+    name: "docker-compose=={{ docker_compose.version }}"

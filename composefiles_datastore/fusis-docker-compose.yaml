@@ -1,0 +1,131 @@
+version: '2'
+
+services:
+  dev: &dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    privileged: true
+    volumes:
+      - ".:/go/src/github.com/luizbafilho/fusis/"
+      - "/lib/modules:/lib/modules"
+    depends_on:
+      - etcd
+    working_dir: /go/src/github.com/luizbafilho/fusis/
+    command: sh -c "go build -o bin/fusis && bin/fusis balancer"
+    ports:
+      - 8000:8000
+    networks:
+      - default
+      - vips
+
+  full:
+    <<: *dev
+    depends_on:
+      - etcd
+      - bird
+      - real
+      - real2
+
+  bird:
+    build:
+      context: .
+      dockerfile: Dockerfile.bird
+    privileged: true
+    volumes:
+      - "./bird.conf:/etc/bird/bird.conf"
+      - bird-volume:/var/run/bird.ctl
+    networks:
+      default:
+        ipv4_address: 172.100.0.20
+
+  etcd:
+    environment:
+      ETCDCTL_API: 3
+      ETCD_DEBUG: "true"
+    image: quay.io/coreos/etcd:v3.2.7
+    command:
+       /usr/local/bin/etcd
+        --name docker-compose
+        --listen-client-urls http://0.0.0.0:2379
+        --advertise-client-urls http://0.0.0.0:2379
+        --listen-peer-urls http://0.0.0.0:2380
+        --initial-advertise-peer-urls http://0.0.0.0:2380
+        --initial-cluster docker-compose=http://0.0.0.0:2380
+        --initial-cluster-token my-etcd-token
+        --initial-cluster-state new
+    networks:
+      default:
+        ipv4_address: 172.100.0.40
+
+  real:
+    image: nginx:1.13
+    networks:
+      default:
+        ipv4_address: 172.100.0.50
+
+  real2:
+    image: nginx:1.13
+    networks:
+      default:
+        ipv4_address: 172.100.0.60
+
+  client:
+    image: tutum/curl
+    networks:
+    networks:
+      default:
+        ipv4_address: 172.100.0.100
+      vips: {}
+
+  test: &test
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    privileged: true
+    environment:
+      ETCD_ENDPOINTS: 172.100.0.40:2379
+    volumes:
+      - ".:/go/src/github.com/luizbafilho/fusis/"
+      - "/lib/modules:/lib/modules"
+    working_dir: /go/src/github.com/luizbafilho/fusis/
+    depends_on:
+      - etcd
+    command: go test -race ./...
+
+  ci:
+    <<: *test
+    command: ./covertests.sh
+
+  e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile.e2e
+    command: /app/e2e/run.sh
+    volumes:
+      - ".:/app"
+      - bird-volume:/var/run/bird.ctl
+    depends_on:
+      - full
+    networks:
+      - default
+      - vips
+
+volumes:
+  bird-volume:
+
+networks:
+  vips:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.100.0.0/24
+
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.100.0.0/24
+

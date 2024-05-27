@@ -1,0 +1,14 @@
+version: "3"
+services:
+        pppoe_client:
+                build:
+                        context: ./
+                privileged: true 
+                volumes:
+                        - /usr/local/docker/pppoe_clients/clients_conf/ned_shev2/chap-secret:/etc/ppp/chap-secret
+                        - /usr/local/docker/pppoe_clients/clients_conf/ned_shev2/dsl-provider:/etc/ppp/peers/dsl-provider 
+
+networks:
+  bridge:
+    external:
+      name: bridge

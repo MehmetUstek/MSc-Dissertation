@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  hapi:
+    image: sensynehealth.azurecr.io/dhos/dhos-hapi-fhir-api:dev
+    ports:
+      - "80:8080"
+    environment:
+      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/dhos-hapi-fhir-api
+      spring.datasource.username: dhos-hapi-fhir-api
+      spring.datasource.password: dhos-hapi-fhir-api
+      spring.datasource.driverClassName: org.postgresql.Driver
+      spring.datasource.max-active: 15
+      hapi.fhir.fhir_version: R4
+
+      # web ui
+      hapi.fhir.tester.home.name: Local Tester
+      hapi.fhir.tester.home.server_address: 'http://localhost:80/fhir'
+      hapi.fhir.tester.home.fhir_version: R4
+
+      hapi.fhir.server_client_id: SensyneHealth
+      hapi.fhir.server_client_secret: UnbelievablyComplexPassword123qwerty

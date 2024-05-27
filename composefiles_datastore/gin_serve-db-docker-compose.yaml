@@ -1,0 +1,47 @@
+version: "3"
+services:
+  mysql-service:
+    # 指定镜像
+    image: mysql:5.7
+
+    # 指定容器名称
+    container_name: mysql_service
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+
+    volumes:
+      - ./docker/mysql/conf:/etc/mysql
+      - ./docker/mysql/logs:/var/log/mysql
+      - ./docker/mysql/data:/var/lib/mysql
+
+    # 端口映射
+    ports:
+      - 3306:3306
+
+    privileged: true
+    restart: always
+
+    networks:
+      - my_net
+
+  redis-service:
+    image: redis:6
+    container_name: redis_service
+
+    ports:
+      - 6379:6379
+
+    volumes:
+      - ./docker/redis/data:/data
+
+    command: redis-server
+
+    privileged: true
+    restart: always
+    networks:
+      - my_net
+
+networks:
+  my_net:
+    external: true

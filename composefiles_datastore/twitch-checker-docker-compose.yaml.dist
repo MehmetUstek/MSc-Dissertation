@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  nginx:
+    image: nginx:1.13-alpine
+    volumes:
+      - .:/application
+      - ./tools/docker/logs/nginx:/var/log/nginx
+      - ./tools/docker/nginx/site.conf:/etc/nginx/conf.d/default.conf
+
+  php:
+    build: ./tools/docker/php-fpm
+    volumes:
+      - .:/application

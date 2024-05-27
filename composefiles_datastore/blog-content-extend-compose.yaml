@@ -1,0 +1,4 @@
+services:
+  redis:
+    image: "redis:${REDIS_TAG}"
+    profiles: [webapp, api]

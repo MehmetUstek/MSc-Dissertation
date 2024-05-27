@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+    hostname: 'local'
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./eccube:/var/www/eccube
+      - ./root/usr/local/etc/php/php.ini:/usr/local/etc/php/php.ini
+      - ./root/root/.bashrc:/root/.bashrc
+      - ./root/root/.vimrc:/root/.vimrc
+      - eccube_var:/var/www/eccube/var
+      - eccube_node_modules:/var/www/eccube/node_modules
+    depends_on:
+      - db
+    command: "/bin/bash -c 'if [ ! -f /usr/local/.initialized ]; then chown -R www-data: /var/www/eccube && touch /usr/local/.initialized; fi && apache2-foreground'"
+  db:
+    image: postgres:14
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: &db_name eccube
+      POSTGRES_USER: &db_user db_user
+      POSTGRES_PASSWORD: &db_password db_password
+    volumes:
+      - eccube_db:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - 1080:1080
+      - 1025:1025
+    depends_on:
+      - db
+volumes:
+  eccube_var:
+  eccube_node_modules:
+  eccube_db:

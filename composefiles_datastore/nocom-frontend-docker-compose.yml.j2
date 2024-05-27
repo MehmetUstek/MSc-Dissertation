@@ -1,0 +1,11 @@
+version: '2.4'
+services:
+  "{{ nocom_project_name }}":
+    image: "registry.gitlab.com/{{ nocom_docker_image_name }}:latest"
+    restart: unless-stopped
+    extra_hosts:
+      - "api_server:{{ nocom_api_server_addressv4 }}"
+    ports:
+      - "8080:80"
+    volumes:
+      - ./config:/etc/nginx/conf.d:Z

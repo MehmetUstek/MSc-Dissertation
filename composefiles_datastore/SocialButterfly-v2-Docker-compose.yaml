@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+
+  auth:
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+      target: development
+    command: npm run start:dev auth
+    env_file:
+      - ./apps/auth/.env
+    environment:
+      TZ: "America/Denver"
+    ports: 
+      - 8080:8080
+    networks:
+      - socialbutterfly
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+  
+  users:
+    build:
+      context: .
+      dockerfile: ./apps/users/Dockerfile
+      target: development
+    command: >
+      sh -c "npx prisma migrate dev --name init && npm run start:dev users"
+    env_file:
+      - ./apps/users/.env
+    environment:
+      TZ: "America/Denver"
+    networks:
+      - socialbutterfly
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+  
+  events:
+    build:
+      context: .
+      dockerfile: ./apps/events/Dockerfile
+      target: development
+    command: >
+      sh -c "npm run start:dev events"
+    env_file:
+      - ./apps/events/.env
+    environment:
+      TZ: "America/Denver"
+    networks:
+      - socialbutterfly
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+  
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports: 
+      - 5432:5432
+    networks:
+      - socialbutterfly
+    volumes:
+      - socialbutterfly:/var/lib/postgresql/data
+    restart: always
+
+networks:
+  socialbutterfly:
+    external: false
+
+volumes:
+  socialbutterfly:
+    external: true

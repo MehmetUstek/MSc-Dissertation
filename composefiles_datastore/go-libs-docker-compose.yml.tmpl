@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+    {{.Name}}:
+        {{.Name}}:dev-local
+        build:
+            context: ./
+            target: builder
+        ports:
+            - {{.Port}}:{{.Port}}
+        command: CompileDaemon --build="go build --race cmd/{{.Name}}/main.go" --command="./{{.Name}}"
+        volumes:
+            - ./:/go/src/app

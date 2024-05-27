@@ -1,0 +1,220 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kuberneets-compose-yaml
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: kuberneets-compose-yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: chillbroh98/auth:latest
+          ports:
+            - containerPort: 8001
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  namespace: kuberneets-compose-yaml
+spec:
+  selector:
+    app: auth
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: course
+  namespace: kuberneets-compose-yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: course
+  template:
+    metadata:
+      labels:
+        app: course
+    spec:
+      containers:
+        - name: course
+          image: chillbroh98/course:latest
+          ports:
+            - containerPort: 8002
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: course
+  namespace: kuberneets-compose-yaml
+spec:
+  selector:
+    app: course
+  ports:
+    - protocol: TCP
+      port: 8002
+      targetPort: 8002
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learner
+  namespace: kuberneets-compose-yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: learner
+  template:
+    metadata:
+      labels:
+        app: learner
+    spec:
+      containers:
+        - name: learner
+          image: chillbroh98/learner:latest
+          ports:
+            - containerPort: 8003
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: learner
+  namespace: kuberneets-compose-yaml
+spec:
+  selector:
+    app: learner
+  ports:
+    - protocol: TCP
+      port: 8003
+      targetPort: 8003
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  namespace: kuberneets-compose-yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification
+          image: chillbroh98/notification:latest
+          ports:
+            - containerPort: 8004
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification
+  namespace: kuberneets-compose-yaml
+spec:
+  selector:
+    app: notification
+  ports:
+    - protocol: TCP
+      port: 8004
+      targetPort: 8004
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+  namespace: kuberneets-compose-yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: payment
+          image: chillbroh98/payment:latest
+          ports:
+            - containerPort: 8005
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+  namespace: kuberneets-compose-yaml
+spec:
+  selector:
+    app: payment
+  ports:
+    - protocol: TCP
+      port: 8005
+      targetPort: 8005
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  namespace: kuberneets-compose-yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+        - name: user
+          image: chillbroh98/user:latest
+          ports:
+            - containerPort: 8006
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user
+  namespace: kuberneets-compose-yaml
+spec:
+  selector:
+    app: user
+  ports:
+    - protocol: TCP
+      port: 8006
+      targetPort: 8006

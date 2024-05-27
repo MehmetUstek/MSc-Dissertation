@@ -1,0 +1,15 @@
+---
+- name: Eliminación de la infraestructura de Docker Compose en la instancia
+  hosts: docker
+  become: true
+
+  tasks:
+    - name: Eliminación de la infraestructura
+      community.docker.docker_compose:
+        project_src: docker
+        files:
+          - docker-compose.yaml
+        state: absent
+        remove_images: all
+        remove_volumes: true
+        docker_host: unix:///var/run/docker.sock

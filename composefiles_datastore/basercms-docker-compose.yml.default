@@ -1,0 +1,83 @@
+version: '3'
+
+# volumes:
+#  db-volume: # windowsの場合はコメントを外す
+
+services:
+  bc-db:
+    container_name: bc-db
+    image: mysql:8.0
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql
+      # - db-volume:/var/lib/mysql # windowsの場合はコメントを外し、上の行をコメントアウトする
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "basercms"
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci --innodb-use-native-aio=0 --default_authentication_plugin=mysql_native_password
+
+  bc-php:
+    container_name: bc-php
+    image: baserproject/basercms:php8.1
+    volumes:
+      - ../:/var/www/html:delegated
+    environment:
+      PHP_IDE_CONFIG: "serverName=localhost"
+      XDEBUG_MODE: "debug"
+      XDEBUG_SESSION: "1"
+      COMPOSER_ALLOW_SUPERUSER: 1
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - bc-db
+    command: bash -c "/var/www/html/docker/bin/init.sh && apache2-foreground"
+
+  bc-smtp:
+    container_name: bc-smtp
+    image: schickling/mailcatcher
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+
+  bc-pma:
+    container_name: bc-pma
+    image: phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=bc-db
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    links:
+      - bc-db
+    ports:
+     - 8080:80
+    volumes:
+       - ./phpmyadmin/sessions:/sessions
+
+  bc-pg:
+    image: postgres:15.2
+    container_name: bc-pg
+    ports:
+      - 5432:5432
+    volumes:
+      - ./volumes/postgres:/var/lib/postgres
+      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    user: root
+
+  bc-pga:
+    image: dpage/pgadmin4:6
+    container_name: bc-pga
+    ports:
+      - 10080:80
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin/storage
+    environment:
+      PGADMIN_DEFAULT_EMAIL: foo@example.com
+      PGADMIN_DEFAULT_PASSWORD: root

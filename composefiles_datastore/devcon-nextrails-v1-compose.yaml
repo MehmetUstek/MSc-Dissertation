@@ -1,0 +1,126 @@
+# name: ${PNAME}
+version: "3"
+
+services:
+  frontend: # サービス名は変数は使えない
+    container_name: ${CONTAINER1}_${APPNAME}_${PNAME}
+    build:
+      context: .
+      dockerfile: ./${CONTAINER1}/Dockerfile
+      args:
+        CONTAINER1: ${CONTAINER1}
+        LOCALUID: ${LOCALUID}
+        LOCALUNAME: ${LOCALUNAME}
+        LOCALGID: ${LOCALGID}
+        LOCALGNAME: ${LOCALGNAME}
+        APP_PATH: /${APPNAME}
+    volumes:
+      - ../${APPNAME}/${CONTAINER1}:/${APPNAME}
+    environment: # コンテナ内に引き継ぐ変数
+      NGATE: ${NGATE}
+      PORT2: ${PORT2}
+      CONTAINER2: ${CONTAINER2}
+      CODESPACES: ${CODESPACES} # Codespace用
+      CODESPACE_NAME: ${CODESPACE_NAME} # Codespace用
+      GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: ${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN} # Codespace用
+      GITHUB_TOKEN: ${GITHUB_TOKEN} # Codespace用
+    command: dumb-init /bin/sh # PID1問題（シグナル伝搬とプロセス終了）への対応 : 
+    # command: yarn dev #OK
+    # command: dumb-init yarn run #OK
+    # command: dumb-init node /root/container.js #NG
+    # https://qiita.com/bricolageart/items/a509594a5b4c349e90b7
+    # https://qiita.com/t_katsumura/items/ed105f1c139b24f7fe4f
+    # https://text.superbrothers.dev/200328-how-to-avoid-pid-1-problem-in-kubernetes/
+    tty: true
+    ports:
+      - ${PORT1}
+    networks:
+      - nw
+
+  backend: # サービス名は変数は使えない
+    container_name: ${CONTAINER2}_${APPNAME}_${PNAME}
+    build:
+      context: .
+      dockerfile: ./${CONTAINER2}/Dockerfile
+      args: # Dockerfileに引き継ぐ変数
+        CONTAINER2: ${CONTAINER2}
+        LOCALUID: ${LOCALUID}
+        LOCALUNAME: ${LOCALUNAME}
+        LOCALGID: ${LOCALGID}
+        LOCALGNAME: ${LOCALGNAME}
+        APP_PATH: /${APPNAME}
+    volumes:
+      # - type: bind
+      #   source: ./${CONTAINER2}
+      #   target: /${APPNAME}:rw
+      - ../${APPNAME}/${CONTAINER2}:/${APPNAME}:rw
+    environment: # コンテナ内に引き継ぐ変数
+      TZ: ${TZ}
+      LANG: ${LANG}
+      RAILS_ENV: development
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PW: ${DB_PW}
+      NGATE: ${NGATE}
+      PORT1: ${PORT1}
+      CODESPACE_NAME: ${CODESPACE_NAME} # Codespace用
+      # MYPORT: ${PORT2} # Codespace用
+      # CODESPACES: ${CODESPACES} # Codespace用
+      # GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: ${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN} # Codespace用
+      # GITHUB_TOKEN: ${GITHUB_TOKEN} # Codespace用
+      
+    # command: rails server -e <- tty:trueしてるからこれで立ち上げて中でサーバ落としても大丈夫なのでは？
+    command: /bin/sh
+    ports:
+      - ${PORT2}
+    depends_on:
+      - ${CONTAINER3}
+    tty: true # 追記
+    networks:
+      - nw
+
+  db: # サービス名は変数は使えない
+    image: postgres:14.3-alpine
+    container_name: ${CONTAINER3}_${APPNAME}_${PNAME}
+    environment:
+      - TZ=${TZ}
+      - PGTZ=${TZ}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PW}
+    volumes:
+      # - type: bind
+      #   source: ./${CONTAINER3}/data
+      #   target: /var/lib/postgresql/data 
+      - ../${APPNAME}/${CONTAINER3}/data:/var/lib/postgresql/data:rw
+      # memo:https://nishinatoshiharu.com/docker-volume-tutorial/
+    ports:
+      - ${PORT3}
+    networks:
+      - nw
+
+  adminer: # サービス名は変数は使えない
+    image: adminer:latest
+    container_name: ${CONTAINER4}_${APPNAME}_${PNAME}
+    ports:
+      - ${PORT4}
+    # restart: always
+    depends_on:
+      - ${CONTAINER3}
+    environment:
+      - ADMINER_NAME="ADMINER for PostgreSQL DB"
+      - ADMINER_SERVER="db"
+      - ADMINER_DRIVER="pgsql"
+      - ADMINER_DB=${DB_NAME}
+      - ADMINER_USERNAME=${DB_USER}
+      - ADMINER_PASSWORD=${DB_PW}
+    networks:
+      - nw
+      
+# http://ajisaba.net/develop/docker/docker-compose_ip.html
+networks:
+  nw:
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NSUBW}
+          gateway: ${NGATE}

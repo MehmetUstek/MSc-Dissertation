@@ -1,0 +1,12 @@
+version '3.3'
+services:
+  webserver1:
+    image: ubuntu/apache2
+    environment: PRD
+    ports:
+      - "81:80"
+  webserver2:
+    image: ubuntu/apache2
+    environment: Dev
+    ports:
+      - "82:80"

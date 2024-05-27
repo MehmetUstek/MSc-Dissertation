@@ -1,0 +1,44 @@
+x-ruby: &ruby
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+  volumes:
+    - ./:/app
+    # Saving gems to volume makes bundle install faster (from the second time
+    # on).
+    - bundler_volume:/usr/local/bundle
+
+services:
+  ruby:
+    <<: *ruby
+    command:
+      - irb
+    # For binding.pry.
+    tty: true
+    stdin_open: true
+    environment:
+      - SPARROW_CONFIG=/app/sparrow.example.yml
+      - PUBSUB_EMULATOR_HOST=pubsub:8085
+    depends_on:
+      - pubsub
+
+  bundler:
+    <<: *ruby
+    command:
+      - bundle
+      - install
+
+  pubsub:
+    image: google/cloud-sdk:476.0.0
+    command:
+      - gcloud
+      - beta
+      - emulators
+      - pubsub
+      - start
+      - --host-port=0.0.0.0:8085
+    # For faster stop. Messages won't survive reboot anyway.
+    stop_signal: SIGKILL
+
+volumes:
+  bundler_volume:

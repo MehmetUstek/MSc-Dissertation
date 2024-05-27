@@ -1,0 +1,163 @@
+version: '3.5'
+
+services:
+  gerrit:
+    image: "{{ gerrit_image }}"
+    ports:
+      - "8080:8080"
+      - "29418:29418"
+    command: |
+      /bin/sh -c '\
+        git config -f /var/gerrit/etc/gerrit.config gerrit.canonicalWebUrl http://localhost:8080/ && \
+        git config -f /var/gerrit/etc/gerrit.config gerrit.ui POLYGERRIT && \
+        git config -f /var/gerrit/etc/gerrit.config sendemail.enable false && \
+        git config -f /var/gerrit/etc/gerrit.config noteDb.changes.autoMigrate true && \
+        /entrypoint.sh'
+  gerritconfig:
+    image: "{{ zuul_image }}"
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    depends_on:
+      - gerrit
+    volumes:
+      - "./playbooks/:/usr/src/:z"
+      - "./projects/:/var/projects/:z"
+    env_file: secrets.env
+    command: |
+      /bin/sh -c '\
+        bash /usr/src/inject-ssh-keys.sh && \
+        pip install ansible &&
+        ansible-playbook -vv \
+            {% if mirror_fqdn is defined %}
+            -e mirror_fqdn={{ mirror_fqdn }} \
+            {% endif %}
+            {% if zuul_site_mirror_fqdn is defined %}
+            -e zuul_site_mirror_fqdn={{ zuul_site_mirror_fqdn }} \
+            {% endif %}
+            {% if pypi_fqdn is defined %}
+            -e pypi_fqdn={{ pypi_fqdn }} \
+            {% endif %}
+            {% if package_mirror is defined %}
+            -e package_mirror={{ package_mirror }} \
+            {% endif %}
+            /usr/src/setup-gerrit.yaml'
+  zk:
+    image: "{{ zk_image }}"
+  mysql:
+    image: "{{ mariadb_image }}"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: zuul
+      MYSQL_USER: zuul
+      MYSQL_PASSWORD: secret
+  scheduler:
+    depends_on:
+      - gerritconfig
+      - zk
+      - mysql
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    command: |
+        sh -c '\
+          cd /usr/src/ && \
+          bash inject-ssh-keys.sh && \
+          bash wait-gerrit.sh && \
+          bash add-gerrit-host-keys.sh && \
+          zuul-scheduler -d'
+    image: "{{ zuul_scheduler_image }}"
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - "./playbooks/:/usr/src/:z"
+      - /var/lib/zuul
+      - "./projects:/var/projects/:z"
+    env_file: secrets.env
+  web:
+    command: |
+        sh -c '\
+          cd /usr/src/ && \
+          bash wait-mysql.sh && \
+          zuul-web -d'
+    depends_on:
+      - scheduler
+      - mysql
+    ports:
+      - "9000:9000"
+    image: "{{ zuul_web_image }}"
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - "./playbooks/:/usr/src/:z"
+  executor:
+    privileged: true
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    command: "sh -c 'cd /usr/src/; bash inject-ssh-keys.sh && bash wait-gerrit.sh && bash add-gerrit-host-keys.sh && zuul-executor -d'"
+    depends_on:
+      - scheduler
+    image: "{{ zuul_executor_image }}"
+    sysctls:
+      net.ipv4.tcp_keepalive_time: 600
+      net.ipv4.tcp_keepalive_intvl: 75
+      net.ipv4.tcp_keepalive_probes: 9
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - "./playbooks/:/usr/src/:z"
+      - "{{ logs_path }}:/srv/static/logs:z"
+      - "./projects:/projects/:z"
+    env_file: secrets.env
+
+  fingergw:
+    environment:
+      no_proxy: "${no_proxy}"
+    command: "zuul-fingergw -d"
+    depends_on:
+      - executor
+    image: "{{ zuul_fingergw_image }}"
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - /var/lib/zuul
+    ports:
+      - "79:79"
+
+  launcher:
+    command: "nodepool-launcher -d -l /etc/nodepool/launcher-logging.yaml"
+    user: root
+    depends_on:
+      - zk
+    image: "{{ nodepool_launcher_image }}"
+    volumes:
+      - "./etc_nodepool/:/etc/nodepool/:z"
+      - "~/.config/openstack/:/etc/openstack/:z"
+      - "./etc/pki/:/etc/pki/:z"
+    ports:
+      - "8022:8022"
+      - "8005:8005"
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+  logs:
+    image: "{{ logs_image }}"
+    ports:
+      - "8000:80"
+    volumes:
+      - "{{ logs_path }}:/usr/local/apache2/htdocs:z"
+      - "./httpd.conf:/usr/local/apache2/conf/httpd.conf:z"
+
+{% for i in range(mergers|int) %}
+  merger{{ i }}:
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    command: |
+        sh -c ' cd /usr/src/; \
+            bash inject-ssh-keys.sh && \
+            bash wait-gerrit.sh && \
+            bash add-gerrit-host-keys.sh && \
+            zuul-merger -d'
+    depends_on:
+      - scheduler
+    image: "{{ zuul_merger_image }}"
+    env_file: secrets.env
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - "{{ logs_path }}:/srv/static/logs:z"
+      - "./playbooks:/usr/src:z"
+
+{% endfor %}

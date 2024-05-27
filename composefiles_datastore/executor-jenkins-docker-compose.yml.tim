@@ -1,0 +1,30 @@
+# Because volumes_from in v3 is not intuitive, using v2.
+# see. https://stackoverflow.com/questions/42232051
+version: '2'
+services:
+  launcher:
+    image: screwdrivercd/launcher:{{launcher_version}}
+    container_name: {{build_id_with_prefix}}-init
+    labels:
+      sdbuild: {{build_id_with_prefix}}
+    volumes:
+      - /opt/sd
+    entrypoint: /bin/true
+  build:
+    image: {{base_image}}
+    container_name: {{build_id_with_prefix}}-build
+    volumes_from:
+      - launcher:rw
+    labels:
+      sdbuild: {{build_id_with_prefix}}
+    mem_limit: {{memory}}
+    memswap_limit: {{memory_swap}}
+    volumes_from:
+      - launcher:rw
+    entrypoint: /opt/sd/tini
+    command:
+      - "--"
+      - "/bin/sh"
+      - "-c"
+      - |
+          /opt/sd/run.sh "{{token}}" "{{api_uri}}" "{{store_uri}}" "$SD_BUILD_TIMEOUT" "{{build_id}}" "{{ui_uri}}"

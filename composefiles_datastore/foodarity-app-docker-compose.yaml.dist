@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  postgres-database:
+    container_name: postgres-database
+    build:
+      context: docker/database/postgres
+      args:
+        UID: $U_ID
+    restart: always
+    environment:
+      POSTGRES_DB: dbname #your db name
+      POSTGRES_USER: username #your db username
+      POSTGRES_PASSWORD: password #your db password
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/database/postgres/data:/var/lib/postgresql/data #No crear la carpeta data
+    networks:
+      - docker-network-devel
+networks:
+  docker-network-devel:
+    external: true

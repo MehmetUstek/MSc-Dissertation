@@ -1,0 +1,11 @@
+ldap_Samba:
+    image: ppwillians/centos-openldap_ssh
+    
+    ports: 
+      - "389:389"
+      - "636:636"
+    volumes:
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+        - ~/containers/ldap_samba:/etc/openldap 
+
+# restart: always

@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  sickchill:
+    image: sickchill/sickchill:latest
+    container_name: sickchill
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    volumes:
+      - /docker/sickchill/data:/data
+      - /docker/sickchill/downloads:/downloads
+      - /docker/sickchill/tv:/tv
+      - /docker/sickchill/cache:/app/sickchill/sickchill/gui/slick/cache
+      - /etc/localtime:/etc/localtime:ro

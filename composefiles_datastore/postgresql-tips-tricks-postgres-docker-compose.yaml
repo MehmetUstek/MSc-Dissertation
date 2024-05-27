@@ -1,0 +1,38 @@
+version: "3.5"
+
+services:
+
+  adventureworks:
+    container_name: postgres_container
+    image: postgres:latest
+    volumes:
+      - "./in/csv:/tmp/csv"
+      - "./scripts/postgresql/docker_postgres_init.sql:/docker-entrypoint-initdb.d/install.sql"
+      - db-data:/var/lib/postgresql/data
+    restart: "no"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: adventureworks
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: ${ADVENTUREWORKS_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgAdmin4_container
+    depends_on:
+      - adventureworks
+    image: dpage/pgadmin4:latest
+    ports:
+      - "3001:80"
+    restart: "no"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_LISTEN_PORT: 80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+volumes:
+    db-data:
+    pgadmin-data:      

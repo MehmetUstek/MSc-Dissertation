@@ -1,0 +1,5 @@
+services:
+  ivy:
+    image: axonivy/axonivy-engine:dev
+    ports:
+     - 8080:8080

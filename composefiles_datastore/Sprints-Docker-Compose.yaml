@@ -1,0 +1,23 @@
+ version: "3.9"
+ services:
+   app:
+     build: ./FlaskApp
+     depends_on:
+      - db
+     ports:
+       - "5001:5001"
+     environment:
+      db_root_user: root
+      db_root_password: root
+      db_mysql_host: db
+ 
+   db:
+     image: mysql:latest
+     ports:
+       - "32200:3306"
+     environment:
+      db_mysql: bucketlist
+      db_root_password: root
+
+     volumes:
+       - ./MySQL_Queries:/docker-entrypoint-initdb.d/:ro

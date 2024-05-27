@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+    joinmarket:
+        image: lncm/joinmarket:v0.8.0
+        container_name: joinmarket
+        volumes:
+            - ${HOME}/.joinmarket:/data/.joinmarket
+            - ${HOME}/.bitcoin:/data/.bitcoin
+        restart: on-failure
+        network_mode: host
+        stop_grace_period: 5m30s
+        ports:
+            - "27183:27183"
+            - "27184:27184"

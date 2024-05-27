@@ -1,0 +1,55 @@
+version: '3.5'
+
+services:
+  nginx:
+    image: lexthink-php_skeleton-nginx
+    container_name: lexthink-php_skeleton-nginx
+    build:
+      context: ./docker/nginx
+      args:
+        UID: $U_ID
+    ports:
+      - 8000:80
+    volumes:
+      - ./public:/appdata/www/public
+    depends_on:
+      - php
+    networks:
+      - lexthink-php_skeleton-network
+
+  php:
+    image: lexthink-php_skeleton-php
+    container_name: lexthink-php_skeleton-php
+    build:
+      context: ./docker/php
+      args:
+        UID: $U_ID
+    volumes:
+      - ./:/appdata/www
+    ###> XDEBUG 3 ###
+    # Use your client IP here
+    # Linux: run "ip a | grep docker0"
+    # Windows (with WSL2) and Mac: host.docker.internal
+    environment:
+      XDEBUG_CLIENT_HOST: host.docker.internal
+      XDEBUG_CLIENT_PORT: 9003
+    networks:
+      - lexthink-php_skeleton-network
+
+  mysql:
+    image: lexthink-php_skeleton-mysql
+    container_name: lexthink-php_skeleton-mysql
+    build:
+      context: ./docker/mysql
+    environment:
+      MYSQL_DATABASE: database
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    networks:
+      - lexthink-php_skeleton-network
+
+networks:
+  lexthink-php_skeleton-network:
+    external: true

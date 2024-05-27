@@ -1,0 +1,39 @@
+services:
+  contracts:
+    build:
+      context: packages/contracts
+    container_name: contracts
+    ports:
+      - "8545:8545"
+    networks:
+      - local
+    env_file:
+      - .env
+
+  gateway-db:
+    build:
+      context: .
+      dockerfile: packages/gateway/docker/database/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16.2
+    container_name: gateway-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/data/db
+    restart: always
+    environment:
+      POSTGRES_USER: blockful
+      POSTGRES_PASSWORD: ensdomains
+      POSTGRES_DB: ensdomains
+
+networks:
+  local:
+
+volumes:
+  db_data:

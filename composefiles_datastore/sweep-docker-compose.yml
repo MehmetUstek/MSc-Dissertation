@@ -1,0 +1,21 @@
+services:
+  hosted:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    image: sweepai/sweep
+    container_name: webhook
+    # network_mode: "host"
+    volumes:
+      - .:/app
+      - /mnt/caches:/mnt/caches
+    command: >
+      sh -c ". bin/startup.sh"
+    stdin_open: true
+    tty: true
+    ports:
+      - "${PORT:-8080}:8080"
+    restart: unless-stopped

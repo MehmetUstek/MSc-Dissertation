@@ -1,0 +1,45 @@
+---
+services:
+  gluetun:
+    container_name: gluetun
+    image: qmcgaw/gluetun:v3
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 20480:20480 # qbittorrent
+      - 6881:6881
+      - 6881:6881/udp
+      - 6080:6080 # soulseek
+    environment:
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_KEY}
+      - WIREGUARD_ADDRESSES=10.69.146.165/32
+      - SERVER_CITIES=Seattle WA
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Los_Angeles
+      - WEBUI_PORT=20480
+    volumes:
+      - /home/carson/Synology/webapps/qbittorrent/config:/config
+      - ${SYNOLOGY}:/data/torrents
+    restart: unless-stopped
+    network_mode: "container:gluetun"
+  soulseek:
+    image: realies/soulseek:latest
+    container_name: soulseek
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Los_Angeles
+    volumes:
+      - /home/carson/mediaserver_local/configs/soulseek/appdata:/data/.SoulseekQt
+      - ${SOULSEEK}/downloads:/data/Soulseek Downloads
+      - /home/carson/Synology/mediaserver/media:/data/Soulseek Shared Folder
+      - /home/carson/mediaserver_local/configs/soulseek/logs:/data/Soulseek Chat Logs
+    network_mode: "container:gluetun"
+    restart: unless-stopped

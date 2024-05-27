@@ -1,0 +1,26 @@
+version: '2.0'
+services:
+  csblogs-postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=
+  csblogs-api-server:
+    build: .
+    command: build-and-run
+    restart: always
+    ports:
+      - "80:80"
+    links:
+      - csblogs-postgres
+    depends_on:
+      - csblogs-postgres
+    environment:
+      - PORT=80
+      - CSBLOGS_DATABASE_NAME=
+      - CSBLOGS_DATABASE_USERNAME=
+      - CSBLOGS_DATABASE_PASSWORD=
+      - CSBLOGS_DATABASE_HOST=
+      - CSBLOGS_DATABASE_PORT=
+      - CSBLOGS_DATABASE_LOG_SQL_STATEMENTS=
+      - CSBLOGS_JWT_SECRET=

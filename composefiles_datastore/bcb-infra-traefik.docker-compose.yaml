@@ -1,0 +1,46 @@
+version: "3.3"
+
+services:
+  traefik:
+    image: "traefik:v2.2"
+    container_name: "traefik"
+    restart: unless-stopped
+    networks:
+      - proxy
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.http.tls.domains[0].main=barcampbangalore.com"
+      - "--entrypoints.websecure.http.tls.domains[0].sans=*.barcampbangalore.com"
+      - "--certificatesResolvers.dns-cloudflare.acme.storage=acme.json"
+      - "--certificatesResolvers.dns-cloudflare.acme.dnsChallenge.provider=cloudflare"
+      - "--certificatesResolvers.dns-cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
+      - "--certificatesResolvers.le.acme.email=sathya@sathyasays.com"
+      - "--certificatesResolvers.le.acme.storage=acme-tlschl.json"
+      - "--certificatesResolvers.le.acme.tlsChallenge=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`t.barcampbangalore.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=dns-cloudflare"
+      - "traefik.http.routers.dashboard.tls=true"
+    environment:
+      - "CF_API_EMAIL=${CF_API_EMAIL}"
+      - "CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}"
+    ports:
+      - "80:80"
+      - "8083:8080"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/home/ubuntu/traefik/acme.json:/acme.json"
+
+networks:
+  proxy:
+    external: true
+

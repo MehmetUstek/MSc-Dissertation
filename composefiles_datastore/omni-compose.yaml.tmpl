@@ -1,0 +1,207 @@
+version: '2.4'
+networks:
+  {{ .NetworkName }}:
+    labels:
+      e2e: true
+    driver: bridge
+    {{- if .Network }}
+    ipam:
+      driver: default
+      config:
+      - subnet: {{ .NetworkCIDR }}
+    {{- end }}
+
+services:
+{{- range .Nodes }}
+  {{ .Name }}:
+    labels:
+      e2e: true
+    container_name: {{ .Name }}
+    image: {{ .Version }}
+    init: true
+    ports:
+    - {{ if $.BindAll }}26656:{{end}}26656
+    - {{ if .ProxyPort }}{{ .ProxyPort }}:{{ end }}26657
+{{- if .PrometheusProxyPort }}
+    - {{ .PrometheusProxyPort }}:26660
+{{- end }}
+    - 6060
+    volumes:
+    - ./{{ .Name }}:/halo
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: {{ .InternalIP }}{{ end }}
+{{end}}
+
+{{- range .Anvils }}
+  # Initialises geth files and folder from provided genesis file.
+  {{ .Chain.Name }}:
+    labels:
+      e2e: true
+    container_name: {{ .Chain.Name }}
+    platform: linux/amd64
+    image: ghcr.io/foundry-rs/foundry:latest
+    entrypoint:
+      - anvil
+      - --host=0.0.0.0
+      - --chain-id={{ .Chain.ChainID }}
+      - --block-time={{.Chain.BlockPeriod.Seconds}}
+      - --silent
+      {{ if .LoadState }}- --load-state=/anvil/state.json{{ end }}
+    ports:
+      - {{ if .ProxyPort }}{{ .ProxyPort }}:{{ end }}8545
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: {{ .InternalIP }}{{ end }}
+    {{ if .LoadState }}
+    volumes:
+      - {{ .LoadState }}:/anvil/state.json
+    {{ end }}
+{{- end}}
+
+  # Use geth as the omni EVMs.
+{{- range .OmniEVMs }}
+  {{ .InstanceName }}:
+    labels:
+      e2e: true
+    container_name: {{ .InstanceName }}
+    image: "ethereum/client-go:{{ $.GethTag }}"
+    command:
+      - --config=/geth/config.toml
+      # Flags not available via config.toml
+      - --nat=extip:{{ .AdvertisedIP }}
+      - --pprof
+      - --pprof.addr=0.0.0.0
+      - --metrics
+      {{ if .IsArchive }}- --gcmode=archive{{ end }}
+    ports:
+      - {{ if $.BindAll }}8551:{{end}}8551
+      - {{ if .ProxyPort }}{{ .ProxyPort }}:{{ end }}8545
+      - {{ if $.BindAll }}30303:{{end}}30303
+      - 8546
+      - 6060
+    healthcheck:
+      test: "nc -z localhost 8545"
+      interval: 1s
+      retries: 30
+    volumes:
+      - ./{{ .InstanceName }}:/geth
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: {{ .AdvertisedIP }}{{ end }}
+{{end}}
+
+{{- if .Relayer }}
+  relayer:
+    labels:
+      e2e: true
+    container_name: relayer
+    image: omniops/relayer:{{or .OmniTag "main"}}
+    restart: unless-stopped # Restart on crash to mitigate startup race issues
+    volumes:
+      - ./relayer:/relayer
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: 10.186.73.200{{ end }}
+{{end}}
+
+{{- if .Monitor }}
+  monitor:
+    labels:
+      e2e: true
+    container_name: monitor
+    image: omniops/monitor:{{or .OmniTag "main"}}
+    restart: unless-stopped # Restart on crash to mitigate startup race issues
+    volumes:
+      - ./monitor:/monitor
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: 10.186.73.201{{ end }}
+{{ end }}
+
+{{- if .Prometheus }}
+  prometheus:
+    labels:
+      e2e: true
+    container_name: prometheus
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      - --enable-feature=exemplar-storage
+      - --enable-feature=agent
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: 10.186.73.202{{ end }}
+{{ end }}
+
+{{- if .Explorer }}
+  explorer_indexer:
+    labels:
+      e2e: true
+    container_name: explorer_indexer
+    image: omniops/explorer-indexer:{{or .OmniTag "main"}}
+    restart: unless-stopped # Restart on crash to mitigate startup race issues
+    volumes:
+      - ./explorer_indexer:/explorer_indexer
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: 10.186.73.203{{ end }}
+
+  explorer_graphql:
+    labels:
+      e2e: true
+    container_name: explorer_graphql
+    image: omniops/explorer-graphql:{{or .OmniTag "main"}}
+    restart: unless-stopped # Restart on crash to mitigate startup race issues
+    volumes:
+      - ./explorer_graphql:/explorer_graphql
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: 10.186.73.204{{ end }}
+    ports:
+        - 21335:8080
+
+  explorer_ui:
+    labels:
+      e2e: true
+    container_name: explorer_ui
+    image: omniops/explorer-ui:{{or .OmniTag "main"}}
+    restart: unless-stopped # Restart on crash to mitigate startup race issues
+    environment:
+      GRAPHQL_URL: {{ .GraphQLURL }}
+    volumes:
+      - ./explorer_ui:/explorer_ui
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: 10.186.73.205{{ end }}
+    ports:
+        - 57017:3000
+{{ end }}
+
+{{- if .ExplorerDB }}
+  explorer_db:
+    labels:
+      e2e: true
+    image: postgres:14-alpine
+    container_name: explorer_db
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: omni_db
+      POSTGRES_USER: omni
+      POSTGRES_PASSWORD: password
+      ports: 5432:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U omni -d omni_db" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      {{ $.NetworkName }}:
+        {{ if $.Network }}ipv4_address: 10.186.73.206{{ end }}
+{{ end }}

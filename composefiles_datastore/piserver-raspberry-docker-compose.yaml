@@ -1,0 +1,59 @@
+services:
+  portainer_agent:
+    image: portainer/agent:2.18.3
+    container_name: portainer_agent
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    ports:
+      - 9001:9001
+  db:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""
+    ports:
+      - "5432:5432"
+    volumes:
+      - /mnt/hdd/docker_storage/postgres_data:/var/lib/postgresql/data
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - /mnt/hdd/filebrowser/files/media/jellyfin-config:/config
+      - /mnt/hdd/filebrowser/files/media/tvshows:/tvshows:ro
+      - /mnt/hdd/filebrowser/files/media/movies:/movies:ro
+      - /mnt/hdd/filebrowser/files/media/music:/music:ro
+      - /mnt/hdd/filebrowser/files/media/videos:/videos:ro
+      - jellyfin_cache_new:/cache
+    ports:
+      - 8096:8096
+
+  filebrowser:
+    image: filebrowser/filebrowser
+    container_name: filebrowser
+    restart: unless-stopped
+    ports:
+      - "5000:80"
+    volumes:
+      - /mnt/hdd/filebrowser/files:/srv
+      - /mnt/hdd/filebrowser/config/filebrowser.db:/database.db
+      - /mnt/hdd/filebrowser/config/branding:/config/branding
+      - /mnt/hdd/filebrowser/config/settings.json:/.filebrowser.json
+    environment:
+      FB_BASEURL: "/files"
+
+volumes:
+  portainer_data:
+  pihole-data:
+  pihole-dns:
+  plexappstate:

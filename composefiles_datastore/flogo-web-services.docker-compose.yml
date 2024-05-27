@@ -1,0 +1,24 @@
+version: '2.4'
+services:
+  flogo-redis:
+    image: redis
+  flogo-flow-service:
+    image: ${DOCKER_REGISTRY-}flogo/flow-service:${FLOW_SERVICE_TAG:-latest}
+    depends_on:
+    - flogo-redis
+    ports:
+    - "9090:9090"
+    - "9091:9091"
+    links:
+    - flogo-redis
+    command: [ "/flogo/flow-service/flow-service","-p","9090","-addr","flogo-redis:6379" ]
+  flogo-state-service:
+    image: ${DOCKER_REGISTRY-}flogo/state-service:${STATE_SERVICE_TAG:-latest}
+    depends_on:
+    - flogo-redis
+    ports:
+    - "9190:9190"
+    - "9191:9191"
+    links:
+    - flogo-redis
+    command: [ "/flogo/state-service/state-service", "-p", "9190", "-addr", "flogo-redis:6379" ]

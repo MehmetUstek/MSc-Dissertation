@@ -1,0 +1,39 @@
+
+
+services:
+  pyspark:
+    container_name: pyspark
+    # image: ghcr.io/apache/spark-docker/spark:3.5.0-python3
+    build:
+      context: .
+      dockerfile: Spark.Dockerfile
+    tty: true
+    ## command to run bash script using sh then use bash terminal:
+    command: [ "/bin/bash", "-c", "cd /opt/spark/crosspipe && sh /opt/spark/crosspipe/wod.sh && /bin/bash" ]
+    volumes:
+      - ./src/crosspipe/:/opt/spark/crosspipe/:ro
+    environment:
+      SPARK_DRIVER_MEMORY: ${SPARK_DRIVER_MEMORY:-2} # In GB
+      JDBC_OMOP_URL: ${JDBC_OMOP_URL}
+      JDBC_OMOP_USERNAME: ${JDBC_OMOP_USERNAME}
+      JDBC_OMOP_PASSWORD: ${JDBC_OMOP_PASSWORD}
+      JDBC_OMOP_SCHEMA_CDM: ${JDBC_OMOP_SCHEMA_CDM}
+      JDBC_OMOP_SCHEMA_VOCAB: ${JDBC_OMOP_SCHEMA_VOCAB}
+      JDBC_ATLAS_URL: ${JDBC_ATLAS_URL}
+      JDBC_ATLAS_USERNAME: ${JDBC_ATLAS_USERNAME}
+      JDBC_ATLAS_PASSWORD: ${JDBC_ATLAS_PASSWORD}
+      JDBC_ATLAS_SCHEMA_CDM: ${JDBC_ATLAS_SCHEMA_CDM}
+      JDBC_ATLAS_SCHEMA_VOCAB: ${JDBC_ATLAS_SCHEMA_VOCAB}
+      JDBC_CROSSPIPE_URL: ${JDBC_CROSSPIPE_URL}
+      JDBC_CROSSPIPE_USERNAME: ${JDBC_CROSSPIPE_USERNAME}
+      JDBC_CROSSPIPE_PASSWORD: ${JDBC_CROSSPIPE_PASSWORD}
+      JDBC_CROSSPIPE_SCHEMA_CDM: ${JDBC_CROSSPIPE_SCHEMA_CDM}
+      JDBC_CROSSPIPE_SCHEMA_VOCAB: ${JDBC_CROSSPIPE_SCHEMA_VOCAB}
+    
+    networks:
+      - omop-cloudbuild
+
+networks:
+  omop-cloudbuild:
+    external: true
+    name: omop-cloudbuild # Needed for Continuous integration

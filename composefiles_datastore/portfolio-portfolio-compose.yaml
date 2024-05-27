@@ -1,0 +1,23 @@
+version: 3
+
+services:
+  # portfolio page with nginx server
+  portfolio:
+    image: ghcr.io/laszloekovacs/portfolio:latest
+    container_name: portfolio
+    restart: always
+    ports:
+      - 80:80
+
+      # deploy to server
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            docker pull ghcr.io/${{ github.repository }}:latest
+            docker compose down
+            docker compose up -d
+            docker image prune -f

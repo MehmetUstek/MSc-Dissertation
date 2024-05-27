@@ -1,0 +1,33 @@
+name: warg-server
+
+services:
+  fix-permission:
+    image: busybox
+    command: ["sh", "-c", "chown -R 1000:1000 /var/lib/warg-server/data"]
+    volumes:
+      - content:/var/lib/warg-server/data
+
+  api:
+    build: .
+    develop:
+      watch:
+        - path: .
+          action: rebuild
+    environment:
+      WARG_OPERATOR_KEY_FILE: /run/secrets/warg_operator_key
+    secrets:
+      - warg_operator_key
+    ports:
+      - 8090:8090
+    volumes:
+      - content:/var/lib/warg-server/data
+    depends_on:
+      fix-permission:
+        condition: service_completed_successfully
+
+secrets:
+  warg_operator_key:
+    environment: "WARG_OPERATOR_KEY"
+
+volumes:
+  content:

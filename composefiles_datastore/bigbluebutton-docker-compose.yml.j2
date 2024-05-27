@@ -1,0 +1,96 @@
+version: '3'
+
+networks:
+  scalelite:
+    driver: bridge
+
+services:
+{% if scalelite_db_docker %}
+  database:
+    container_name: scalelite_postgresql
+    image: postgres
+    networks: [scalelite]
+    volumes:
+    - /var/lib/postgresql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: '{{ scalelite_db_user }}'
+      POSTGRES_PASSWORD: '{{ scalelite_db_pass }}'
+    restart: unless-stopped
+{% endif %}
+
+{% if scalelite_redis_docker %}
+  redis:
+    container_name: scalelite_redis
+    image: redis
+    networks: [scalelite]
+    volumes:
+    - /var/lib/redis:/data
+    command:
+    - '--appendonly yes'
+    restart: unless-stopped
+{% endif %}
+
+  scalelite_api:
+    container_name: scalelite-api
+    image: blindsidenetwks/scalelite:latest-api
+    networks: [scalelite]
+{% if scalelite_db_docker or scalelite_redis_docker %}
+    depends_on: &DEPENDS
+{% if scalelite_db_docker %}
+    - database
+{% endif %}
+{% if scalelite_redis_docker %}
+    - redis
+{% endif %}
+{% endif %}
+    volumes:
+    - "{{ scalelite_datadir }}/var/bigbluebutton:/var/bigbluebutton"
+    environment: &ENVS
+      URL_HOST: "{{ inventory_hostname }}"
+      SECRET_KEY_BASE: {{ scalelite_secret_key }}
+      LOADBALANCER_SECRET: {{ scalelite_loadbalancer_key }}
+      DATABASE_URL: "postgresql://{{ scalelite_db_user }}:{{ scalelite_db_pass }}@{{ 'database' if scalelite_db_docker else scalelite_db_host }}:5432/{{ scalelite_db_name }}"
+      REDIS_URL: redis://{{ 'redis' if scalelite_redis_docker else scalelite_redis_host }}
+      RAILS_LOG_TO_STDOUT: 'true'
+    restart: unless-stopped
+
+  scalelite_nginx:
+    container_name: scalelite-nginx
+    image: blindsidenetwks/scalelite:latest-nginx
+    networks: [scalelite]
+{% if scalelite_db_docker or scalelite_redis_docker %}
+    depends_on: *DEPENDS
+{% endif %}
+    ports:
+    - 80:80
+    - 443:443
+    volumes:
+    - "{{ scalelite_datadir }}/var/bigbluebutton/published:/var/bigbluebutton/published:ro"
+    - {{ lookup('vars', certificates.0 + '_pem_path') }}:/etc/nginx/ssl/live/{{ inventory_hostname }}/fullchain.pem
+    - {{ lookup('vars', certificates.0 + '_key_path') }}:/etc/nginx/ssl/live/{{ inventory_hostname }}/privkey.pem
+    environment:
+      <<: *ENVS
+      NGINX_SSL: 'true'
+    restart: unless-stopped
+
+  scalelite_poller:
+    container_name: scalelite-poller
+    image: blindsidenetwks/scalelite:latest-poller
+    networks: [scalelite]
+{% if scalelite_db_docker or scalelite_redis_docker %}
+    depends_on: *DEPENDS
+{% endif %}
+    environment: *ENVS
+    restart: unless-stopped
+
+  scalelite_recording_importer:
+    container_name: scalelite-recording-importer
+    image: blindsidenetwks/scalelite:latest-recording-importer
+    networks: [scalelite]
+{% if scalelite_db_docker or scalelite_redis_docker %}
+    depends_on: *DEPENDS
+{% endif %}
+    volumes:
+    - "{{ scalelite_datadir }}/var/bigbluebutton:/var/bigbluebutton"
+    environment: *ENVS
+    restart: unless-stopped

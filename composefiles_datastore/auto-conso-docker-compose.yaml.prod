@@ -1,0 +1,22 @@
+version: '2.1'
+
+services:
+  web:
+    image: auto-conso
+    restart: unless-stopped
+    build:
+      context: .
+    env_file:
+      - api.env
+    networks:
+      inverseproxy_shared:
+    labels:
+      traefik.docker.network: "inverseproxy_shared"
+      traefik.enable: "true"
+      traefik.frontend.passHostHeader: "true"
+      traefik.port: "80"
+      traefik.www.frontend.rule: "Host:pertes.lachouettecoop.fr"
+
+networks:
+    inverseproxy_shared:
+      external: true

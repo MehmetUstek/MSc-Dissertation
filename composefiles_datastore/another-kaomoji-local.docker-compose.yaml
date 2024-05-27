@@ -1,0 +1,24 @@
+services:
+  postgresql:
+    container_name: another-kaomoji-db
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  another-kaomoji:
+    container_name: another-kaomoji
+    image: another-kaomoji:local
+    restart: always
+    depends_on:
+      - postgresql
+    environment:
+      spring.datasource.url: jdbc:postgresql://postgresql:5432/postgres
+    ports:
+      - "8080:8080"

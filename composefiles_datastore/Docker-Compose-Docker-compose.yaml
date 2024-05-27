@@ -1,0 +1,16 @@
+version: "3"
+services:
+  mongo:
+    image: mongo:6
+    hostname: mongo
+    container_name: mongo
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo "try { rs.status(); 1 } catch { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}).ok }" | mongosh --port 27017 --quiet | grep -q "> 1"
+      interval: 10s
+      start_period: 10s
+    restart: always
+    volumes:
+      - './data:/data/db'

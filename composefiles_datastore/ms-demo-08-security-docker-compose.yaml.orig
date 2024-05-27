@@ -1,0 +1,131 @@
+version: '2.1'
+
+services:
+  product:
+    image: ms-demo-08-security-product-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mongodb_product:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  recommendation:
+    image: ms-demo-08-security-recommendation-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mongodb_recommendation:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  review:
+    image: ms-demo-08-security-review-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  product-composite:
+    image: ms-demo-08-security-product-composite-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  eureka:
+    image: ms-demo-08-security-eureka-server:latest
+    ports:
+      - "8761:8761"
+
+  gateway:
+    image: ms-demo-08-security-gateway:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8443:8443"
+
+  auth-server:
+    image: ms-demo-08-security-authorization-server:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "9999:9999"
+
+  workstation:
+    image: openjdk:latest
+    tty: true
+
+  # $ mongo
+  mongodb_product:
+    image: mongo:3.6.9
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: product-db
+      TZ: Asia/Tokyo
+    ports:
+      - "27017:27017"
+    command: mongod --smallfiles
+    volumes:
+      - ./initdb-mongo-product.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: "mongo --eval 'db.stats().ok'"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # $ mongo
+  mongodb_recommendation:
+    image: mongo:3.6.9
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: recommendation-db
+      TZ: Asia/Tokyo
+    ports:
+      - "27018:27017"
+    command: mongod --smallfiles
+    volumes:
+      - ./initdb-mongo-recommendation.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: "mongo --eval 'db.stats().ok'"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # $ mysql -uroot -h127.0.0.1 -p
+  mysql:
+    image: mysql:5.7.23
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    ports:
+      - "13306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=review-db
+      - MYSQL_USER=vmware
+      - MYSQL_PASSWORD=password
+    volumes:
+      - ./initdb-mysql-review.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uvmware", "-ppassword", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.7.8-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10

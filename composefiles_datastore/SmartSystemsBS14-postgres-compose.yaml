@@ -1,0 +1,9 @@
+version: '3'
+services:
+  some-postgres:
+    image: icetruck
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=testing1234
+

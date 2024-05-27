@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    user: 1000:1000
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    environment:
+      POSTGRES_USER: mercury
+      POSTGRES_PASSWORD: mercury
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /etc/passwd:/etc/passwd:ro
+      - $PROJECT_DIR/postgres/data:/var/lib/postgresql/data/pgdata
+      - $PROJECT_DIR/postgres/initdb:/docker-entrypoint-initdb.d
+      - $PROJECT_DIR/postgres/postgres.conf:/etc/postgresql/postgresql.conf
+    networks:
+      - ckb-mainnet
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+
+  ckb-node:
+    image: nervos/ckb:latest
+    # user: root
+    restart: always
+    working_dir: /var/lib/ckb
+    entrypoint: /bin/docker-entrypoint.sh
+    command: run
+    ports:
+      - ${CKB_RPC_PORT:-8114}:8114
+      - ${CKB_P2P_PORT:-8115}:8115
+      - ${CKB_WS_PORT:-28114}:28114
+    environment:
+      CKB_CHAIN: ${CKB_NETWORK}
+      PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    volumes:
+      - $PROJECT_DIR/ckb-node:/var/lib/ckb
+    networks:
+      - ckb-mainnet
+    deploy:
+      resources:
+        limits:
+          memory: 3000M
+        reservations:
+          memory: 2000M
+
+networks:
+  ckb-mainnet:

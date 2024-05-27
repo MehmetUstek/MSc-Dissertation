@@ -1,0 +1,66 @@
+db:
+ image: com.loy/db:latest
+ ports:
+     - 9092:9092
+        
+discovery:
+      image: com.loy/discovery:latest
+      ports:
+         - 8761:8761
+upm:
+  image: com.loy/upm:latest
+  ports:
+        - 18080:18080
+  links:
+       - discovery:discovery
+       - db:db
+       - oauth:oauth
+        
+        
+oauth:
+    image: com.loy/oauth2:latest
+    ports:
+        - 9999:9999
+    environment:
+               - e.conf.loginSuccessUrl=http://192.168.88.128:8080/
+    links:
+        - discovery:discovery
+        - db:db
+log:
+   image: com.loy/log:latest
+   ports:
+        - 28080:28080
+   links:
+        - oauth:oauth
+        - discovery:discovery
+        - db:db
+
+demo:
+   image: com.loy/demo:latest
+   ports:
+        - 38080:38080
+   links:
+        - oauth:oauth
+        - discovery:discovery
+        - db:db        
+        
+ui:
+  image: com.loy/ui:latest
+  ports:
+       - 8888:8888
+
+gateway:
+    image: com.loy/gateway:latest
+    ports:
+        - 8080:8080
+        - 8000:8000
+    environment:
+               - e.conf.authServer=http://192.168.88.128:9999/uaa
+               - zuul.debug.request=true
+    links:
+        - discovery:discovery
+        - ui:ui
+        - upm:upm
+        - oauth:oauth
+        - log:log
+        - demo:demo

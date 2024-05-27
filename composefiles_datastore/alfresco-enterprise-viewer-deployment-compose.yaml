@@ -1,0 +1,119 @@
+services:
+  alfresco:
+    platform: linux/amd64
+    build:
+      context: ./alfresco
+      args:
+        ALFRESCO_TAG: ${ALFRESCO_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "
+        -Dencryption.keystore.type=JCEKS
+        -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
+        -Dencryption.keyAlgorithm=DESede
+        -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
+        -Dmetadata-keystore.password=mp6yc0UD9e
+        -Dmetadata-keystore.aliases=metadata
+        -Dmetadata-keystore.metadata.password=oKIWzVdEdA
+        -Dmetadata-keystore.metadata.algorithm=DESede
+        "
+      JAVA_OPTS: "
+        -Ddb.driver=org.postgresql.Driver
+        -Ddb.username=alfresco
+        -Ddb.password=alfresco
+        -Ddb.url=jdbc:postgresql://postgres:5432/alfresco 
+        -Dsolr.host=solr6
+        -Dsolr.port=8983
+        -Dsolr.secureComms=secret
+        -Dsolr.sharedSecret=2yhklsj27lx 
+        -Dsolr.base.url=/solr
+        -Dindex.subsystem.name=solr6  
+        -Dshare.host=127.0.0.1
+        -Dshare.port=8080 
+        -Dalfresco.host=localhost
+        -Dalfresco.port=8080
+        -Daos.baseUrlOverwrite=http://localhost:8080/alfresco/aos
+        -Dmessaging.broker.url=\"failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true\"
+        -Ddeployment.method=DOCKER_COMPOSE
+        -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
+        -Dcsrf.filter.enabled=false
+        -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
+        "
+    volumes:
+      - ./alfresco/resources/openannotate-override-placeholders.properties:/usr/local/tomcat/shared/classes/openannotate-override-placeholders.properties
+      - ./alfresco/resources/default.policy:/usr/lib/jvm/jre/lib/security/default.policy
+      - ./alfresco/resources/server.xml:/usr/local/tomcat/conf/server.xml
+      - ./alfresco/license/TextLicense.l4j:/usr/local/tomcat/shared/classes/alfresco/module/com.tsgrp.opencontent/license/TextLicense.l4j
+#      - ./alfresco/license/alfresco.lic:/usr/local/tomcat/webapps/alfresco/WEB-INF/classes/alfresco/extension/license/alfresco.lic   
+
+  transform-core-aio:
+    image: alfresco/alfresco-transform-core-aio:${TRANSFORM_ENGINE_TAG}
+    environment:
+      JAVA_OPTS: " -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80"
+
+  share:
+    build:
+      context: ./share
+      args:
+        SHARE_TAG: ${SHARE_TAG}    
+    environment:
+      REPO_HOST: "alfresco"
+      REPO_PORT: "8080"
+      JAVA_OPTS: "
+        -XX:MinRAMPercentage=50
+        -XX:MaxRAMPercentage=80
+        -Dalfresco.host=localhost
+        -Dalfresco.port=8080
+        -Dalfresco.context=alfresco
+        -Dalfresco.protocol=http
+        "
+
+  postgres:
+    image: postgres:${POSTGRES_TAG}
+    environment:
+      - POSTGRES_PASSWORD=alfresco
+      - POSTGRES_USER=alfresco
+      - POSTGRES_DB=alfresco
+    command: postgres -c max_connections=300 -c log_min_messages=LOG
+
+  solr6:
+    image: alfresco/alfresco-search-services:${SEARCH_TAG}
+    environment:
+      SOLR_ALFRESCO_HOST: "alfresco"
+      SOLR_ALFRESCO_PORT: "8080"
+      SOLR_SOLR_HOST: "solr6"
+      SOLR_SOLR_PORT: "8983"
+      SOLR_CREATE_ALFRESCO_DEFAULTS: "alfresco,archive"
+      ALFRESCO_SECURE_COMMS: "secret"
+      SOLR_OPTS: "
+        -Dalfresco.secureComms.secret=2yhklsj27lx
+      "
+
+  activemq:
+    image: alfresco/alfresco-activemq:${ACTIVEMQ_TAG}
+    ports:
+      - "8161:8161"
+
+  digital-workspace:
+    image: quay.io/alfresco/alfresco-digital-workspace:${ADW_TAG}
+    environment:
+      APP_CONFIG_AUTH_TYPE: "BASIC"
+      APP_CONFIG_PROVIDER: "ECM"
+      BASE_PATH: ./
+      APP_BASE_SHARE_URL: "http://localhost:8080/workspace/#/preview/s"
+
+
+  proxy:
+    image: alfresco/alfresco-acs-nginx:${ACS_NGINX_TAG}
+    depends_on:
+      - alfresco 
+      - digital-workspace  
+    environment:  
+      - DISABLE_SYNCSERVICE=true    
+      - DISABLE_CONTROL_CENTER=true  
+      - USE_SSL=false
+    ports:
+      - "8080:8080"
+    links: 
+      - digital-workspace  
+      - alfresco 
+      - share

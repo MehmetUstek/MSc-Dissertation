@@ -1,0 +1,14 @@
+services:
+  gatsbyan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gatsbyan
+    image: gatsbyan:latest
+    ports:
+      - 8000:8000
+      - 9000:9000
+    mem_limit: 1g
+    cpus: 2
+#    entrypoint: bun run serve
+#    env_file: .env

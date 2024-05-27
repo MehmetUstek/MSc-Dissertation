@@ -1,0 +1,52 @@
+---
+services:
+  matomo-db:
+    image: mariadb:11.3
+    container_name: matomo-db
+    restart: unless-stopped
+    volumes:
+      - /var/docker/matomo/database:/var/lib/mysql
+    env_file:
+      - ./.env
+    networks:
+      - default
+
+  matomo-app:
+    image: matomo:fpm-alpine
+    container_name: matomo-app
+    restart: unless-stopped
+    volumes:
+      - /var/docker/matomo/app:/var/www/html
+    env_file:
+      - ./.env
+    networks:
+      - default
+
+  matomo-web:
+    image: nginx:alpine
+    container_name: matomo-web
+    restart: unless-stopped
+    volumes:
+      - /var/docker/matomo/app:/var/www/html:ro
+      - ./matomo.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - default
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.matomo.entrypoints=websecure"
+      - "traefik.http.routers.matomo.rule=Host(`${MATOMO_URL}`)"
+      - "traefik.http.routers.matomo.tls=true"
+      - "traefik.http.routers.matomo.tls.certresolver=default"
+      - "traefik.http.routers.matomo.middlewares=default@file"
+      - "traefik.http.services.matomo.loadbalancer.server.port=80"
+    depends_on:
+      - matomo-db
+      - matomo-app
+
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge

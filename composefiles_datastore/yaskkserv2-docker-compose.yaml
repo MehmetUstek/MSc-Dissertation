@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  yaskkserv2:
+    image: ghcr.io/gamoutatsumi/yaskkserv2:latest
+    ports:
+      - '127.0.0.1:1178:1178'
+    restart: unless-stopped
+    init: true

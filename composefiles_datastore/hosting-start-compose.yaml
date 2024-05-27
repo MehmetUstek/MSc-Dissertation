@@ -1,0 +1,5 @@
+---
+- name: Start compose
+  command:
+    chdir: ~/hosting
+    cmd: docker-compose up -d --remove-orphans

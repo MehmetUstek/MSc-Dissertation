@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  chrome:
+    platform: linux/x86_64
+    build:
+      context: chrome/
+    #ports:
+    #  - 9222:9222
+
+  screenshotter:
+    build:
+      context: app/
+    depends_on:
+      - "chrome"
+    ports:
+      - 5000:1024
+
+  admin:
+    platform: linux/x86_64
+    build:
+      context: admin/
+    depends_on:
+      - "screenshotter"

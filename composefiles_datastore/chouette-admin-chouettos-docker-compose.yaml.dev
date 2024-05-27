@@ -1,0 +1,31 @@
+# Big thanks to https://github.com/yemiwebby/symfony-docker-tut
+
+version: '3.8'
+services:
+  database:
+    image: mariadb:10.3
+    ports:
+      - '3306:3306'
+    environment:
+      - MARIADB_ROOT_PASSWORD=adminchouettos
+      - MARIADB_USER=adminchouettos
+      - MARIADB_PASSWORD=adminchouettos
+      - MARIADB_DATABASE=adminchouettos
+    volumes:
+      - ./data/:/var/lib/mysql
+  symfony:
+    build: .
+    ports:
+      - '8000:8000'
+    environment:
+      - SYMFONY_DATABASE_HOST=database
+      - SYMFONY_DATABASE_PORT_NUMBER=3306
+      - SYMFONY_DATABASE_NAME=adminchouettos
+      - SYMFONY_DATABASE_USER=adminchouettos
+      - SYMFONY_DATABASE_PASSWORD=adminchouettos
+    depends_on:
+      - database
+  cron:
+    build: ./cron/
+    depends_on:
+      - symfony

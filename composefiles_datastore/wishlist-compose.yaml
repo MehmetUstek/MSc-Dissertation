@@ -1,0 +1,86 @@
+x-database-env-variables: &database-env-variables
+  DATABASE_URL: postgresql://root@database:26257/defaultdb?sslmode=disable
+
+services:
+  devcontainer:
+    build:
+      args:
+        NODE_VERSION: ${NODE_VERSION}
+      context: ./docker/devcontainer
+    command:
+      - sleep
+      - infinity
+    environment:
+      JEST_JUNIT_OUTPUT_DIR: ${JEST_JUNIT_OUTPUT_DIR:-}
+      JEST_JUNIT_OUTPUT_NAME: ${JEST_JUNIT_OUTPUT_NAME:-result.xml}
+      NPM_CONFIG_CACHE: /home/npm
+    user: ${HOST_USER_IDS:-1000:1000}
+    volumes:
+      - type: bind
+        source: .
+        target: /srv/app
+      - type: bind
+        source: ~/.npm
+        target: /home/npm
+    working_dir: /srv/app
+
+  dev:
+    command:
+      - yarn
+      - dev
+    depends_on:
+      - database
+    environment:
+      <<: *database-env-variables
+    image: node:${NODE_VERSION}
+    networks:
+      - dev
+    ports:
+      - 3000:3000
+    user: ${HOST_USER_IDS:-1000:1000}
+    volumes:
+      - type: bind
+        source: .
+        target: /srv/app
+    working_dir: /srv/app
+
+  prod:
+    command:
+      - /bin/bash
+      - -c
+      - |
+        yarn build
+        yarn start
+    depends_on:
+      - database
+    environment:
+      <<: *database-env-variables
+    image: node:${NODE_VERSION}
+    networks:
+      - prod
+    ports:
+      - 8000:3000
+    user: ${HOST_USER_IDS:-1000:1000}
+    volumes:
+      - type: bind
+        source: .
+        target: /srv/app
+    working_dir: /srv/app
+
+  database:
+    command:
+      - start-single-node
+      - '--insecure'
+      - '--store=type=mem,size=0.25'
+      - '--advertise-addr=localhost'
+    image: cockroachdb/cockroach
+    networks:
+      - dev
+      - prod
+    ports:
+      - 26257:26257
+      - 8080:8080
+
+networks:
+  dev:
+  prod:

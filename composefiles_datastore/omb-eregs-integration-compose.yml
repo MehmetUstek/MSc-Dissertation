@@ -1,0 +1,25 @@
+version: '2'
+services:
+  selenium_chrome:
+    image: selenium/standalone-chrome:3
+    depends_on:
+      - prod
+      - prod-api
+      - proxy
+  selenium_firefox:
+    image: selenium/standalone-firefox:3
+    depends_on:
+      - prod
+      - prod-api
+      - proxy
+  selenium-py.test:
+    image: python:3.6.2
+    volumes:
+      - $PWD:/usr/src/app
+    working_dir: /usr/src/app/devops/integration_tests/
+    stdin_open: true
+    tty: true
+    entrypoint: ../../api/.docker/activate_then py.test
+    external_links:
+      - selenium_chrome
+      - selenium_firefox

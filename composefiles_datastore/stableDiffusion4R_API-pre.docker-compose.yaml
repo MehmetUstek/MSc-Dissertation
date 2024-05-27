@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  stablediffusion4r_api-frontend:
+    image: stablediffusion4r_api-frontend
+    container_name: stablediffusion4r_api-frontend
+    build:
+      context: ./frontend/
+      dockerfile: ./frontend.Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    tty: true
+    depends_on:
+      - stablediffusion4r_api-backend
+  stablediffusion4r_api-backend:
+    image: stablediffusion4r_api-backend
+    container_name: stablediffusion4r_api-backend
+    build:
+      context: ./backend/preApi
+      dockerfile: ./backend.Dockerfile
+    ports:
+      - 8000:8000
+    tty: true

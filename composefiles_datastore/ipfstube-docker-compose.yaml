@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+    ipfsnode:
+        image: ipfs/go-ipfs:v0.4.18
+        restart: always
+        volumes:
+            - ~/volumes/ipfs:/data/ipfs
+        ports:
+            - "4001:4001"
+    frontend:
+        build: .
+        restart: always
+        volumes:
+            - /etc/letsencrypt:/etc/letsencrypt:ro
+            - /tmp/letsencrypt-auto:/tmp/letsencrypt-auto
+        ports:
+            - "80:80"
+            - "443:443"

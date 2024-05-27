@@ -1,0 +1,290 @@
+{% set build_tag = config['deployment']['build']['tag'] %}
+{% set build_registry = config['deployment']['build']['registry'] %}
+{% set build_proxy = config['deployment']['build']['proxy'] %}
+{% set polytope_proxy = config['deployment']['polytope_proxy'] %}
+
+version: '3.7'
+
+configs:
+  default:
+    file: ./config.yaml
+  ingress:
+    file: ./polytope-nginx.conf
+{% if 'https' in config['deployment']['ingress'] %}
+  ingress_key:
+    file: {{ config['deployment']['ingress']['https']['private_key'] }}
+  ingress_cert_chain:
+    file: {{ config['deployment']['ingress']['https']['cert_chain'] }}
+{% endif %}
+
+networks:
+  polytope:
+
+volumes:
+  {% if 'storage_path' in config['deployment'] %}
+  {% else %}
+  staging:
+    driver: local
+    driver_opts:
+      o: "size=5000m"
+      device: tmpfs
+      type: tmpfs
+  fdb:
+    driver: local
+    driver_opts:
+      o: "size=1000m"
+      device: tmpfs
+      type: tmpfs
+  mongodb:
+    driver: local
+    driver_opts:
+      o: "size=1000m"
+      device: tmpfs
+      type: tmpfs
+  {% endif %}
+  ppdir:
+  statistics:
+  tmp:
+
+services:
+
+  frontend:
+    image: {{ build_registry }}/polytope-common:{{ build_tag }}
+    command: python -m polytope_server.frontend
+    build:
+      context: ../../
+      dockerfile: polytope-deployment/common/Dockerfile
+      target: polytope-common
+      args:
+        proxy: {{ build_proxy }}
+    deploy:
+      replicas: {{ config['deployment']['frontend']['replicas'] }}
+    environment:
+      - POLYTOPE_PROXY={{ polytope_proxy }}
+    configs:
+      - source: default
+        target: /etc/polytope/config.yaml
+    ports:
+      - "{{ config['frontend']['port'] }}:{{ config['frontend']['port'] }}"
+    networks:
+      - polytope
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:{{ config['frontend']['port'] }}/api/v1/test"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  telemetry:
+    image: {{ build_registry }}/polytope-common:{{ build_tag }}
+    command: python -m polytope_server.telemetry
+    build:
+      context: ../../
+      dockerfile: polytope-deployment/common/Dockerfile
+      target: polytope-common
+      args:
+        proxy: {{ build_proxy }}
+    deploy:
+      replicas: {{ config['deployment']['telemetry']['replicas'] }}
+    configs:
+      - source: default
+        target: /etc/polytope/config.yaml
+    ports:
+      - "{{ config['telemetry']['port'] }}:{{ config['telemetry']['port'] }}"
+    networks:
+      - polytope
+
+  mongodb:
+    image: mongo:3.6
+    deploy:
+      replicas: {{ config['deployment']['mongodb']['replicas'] }}
+    volumes:
+      {% if 'storage_path' in config['deployment'] %}
+      - "{{ config['deployment']['storage_path'] }}/mongodb:/data/db"
+      {% else %}
+      - mongodb:/data/db
+      {% endif %}
+    ports:
+      - "{{ config['deployment']['mongodb']['port'] }}:27017"
+    networks:
+      - polytope
+
+  staging:
+    #strategy type recreate
+    image: minio/minio:RELEASE.2020-02-27T00-23-05Z
+    command: ["server", "/data"]
+    deploy:
+      replicas: {{ config['deployment']['minio']['replicas'] }}
+    environment:
+      - MINIO_ACCESS_KEY={{ config['staging'].get('s3', {}).get('access_key', "") }}
+      - MINIO_SECRET_KEY={{ config['staging'].get('s3', {}).get('secret_key', "") }}
+    volumes:
+      {% if 'storage_path' in config['deployment'] %}
+      - "{{ config['deployment']['storage_path'] }}/staging:/data"
+      {% else %}
+      - staging:/data
+      {% endif %}
+    #readiness probe
+    #liveness probe
+    ports:
+      - "{{ config['deployment']['minio']['port'] }}:9000"
+    networks:
+      - polytope
+
+  stagingtwo:
+    #checksum/config? date?
+    image: {{ build_registry }}/polytope-common:{{ build_tag }}
+    command: python -m polytope_server.basic_object_store
+    build:
+      context: ../../
+      dockerfile: polytope-deployment/common/Dockerfile
+      target: polytope-common
+      args:
+        proxy: {{ build_proxy }}
+    deploy:
+      replicas: {{ config['deployment']['polytope_staging']['replicas'] }}
+    configs:
+      - source: default
+        target: /etc/polytope/config.yaml
+    volumes:
+      {% if 'storage_path' in config['deployment'] %}
+      - "{{ config['deployment']['storage_path'] }}/staging:/data"
+      {% else %}
+      - staging:/data
+      {% endif %}
+    #securityContext: fsGroup: 1500
+    ports:
+      - "{{ config['deployment']['polytope_staging']['port'] }}:9000"
+    networks:
+      - polytope
+
+  rabbitmq:
+    #annotations
+    image: rabbitmq:3.7
+    deploy:
+      replicas: {{ config['deployment']['rabbitmq']['replicas'] }}
+    configs:
+      - source: default
+        target: /etc/polytope/config.yaml
+    ports:
+      - "{{ config['deployment']['rabbitmq']['port'] }}:5672"
+    networks:
+      - polytope
+  #   volumes:
+  #     - ${HOME}/tmp/rabbitmq:/var/lib/rabbitmq/mnesia
+
+  broker:
+    #annotations checksum and date
+    #resource limits! 1Gi RAM, 0.5CPU
+    image: {{ build_registry }}/polytope-common:{{ build_tag }}
+    command: python -m polytope_server.broker
+    build:
+      context: ../../
+      dockerfile: polytope-deployment/common/Dockerfile
+      target: polytope-common
+      args:
+        proxy: {{ build_proxy }}
+    deploy:
+      replicas: {{ config['deployment']['broker']['replicas'] }}
+    configs:
+      - source: default
+        target: /etc/polytope/config.yaml
+    networks:
+      - polytope
+
+  redis:
+    #resource limits! 100Mi RAM, 100m CPU
+    image: redis:5.0.5-alpine
+    deploy:
+      replicas: {{ config['deployment']['redis']['replicas'] }}
+    ports:
+      - "{{ config['deployment']['redis']['port'] }}:6379"
+    networks:
+      - polytope
+
+  worker:
+    #annotations checksum and date
+    image: {{ build_registry }}/worker:{{ build_tag }}
+    command: python -m polytope_server.worker
+    build:
+      context: ../../
+      dockerfile: polytope-deployment/common/Dockerfile
+      target: worker
+      args:
+        proxy: {{ build_proxy }}
+        ssh_pub_key: |
+          {{ ssh_public | indent(10) }}
+        ssh_prv_key: |
+          {{ ssh_private | indent(10) }}
+        install_mars: "{{ config['deployment']['build']['install_mars'] }}"
+        install_fdb: "{{ config['deployment']['build']['install_fdb'] }}"
+        mars_repo: "{{ config['deployment']['build']['mars_repo'] }}"
+        mars_config_repo: "{{ config['deployment']['build']['mars_config_repo'] }}"
+        mars_config_branch: "{{ config['deployment']['build']['mars_config_branch'] }}"
+        fdb_repo: "{{ config['deployment']['build']['fdb_repo'] }}"
+    deploy:
+      replicas: {{ config['deployment']['worker']['replicas'] }}
+    ports:
+      - mode: host
+        target: {{ config['deployment']['worker']['mars_localport'] }}
+        protocol: tcp
+    environment:
+      - POLYTOPE_PROXY={{ polytope_proxy }}
+      - POLYTOPE_WORKER_MARS_LOCALPORT={{ config['deployment']['worker']['mars_localport'] }}
+      - DOCKER_HOST=unix:///tmp/docker.sock
+    configs:
+      - source: default
+        target: /etc/polytope/config.yaml
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ppdir:/var/tmp/ppdir
+      - statistics:/logs/mars/statistics
+      - tmp:/tmp
+      {% if 'storage_path' in config['deployment'] %}
+      - "{{ config['deployment']['storage_path'] }}/fdb:/data"
+      {% else %}
+      - fdb:/data
+      {% endif %}
+      #- "${POLYTOPE_WORKER_PPDIR_VOL}:/var/tmp/ppdir"
+      #- "${POLYTOPE_WORKER_STATISTICS_VOL}:/logs/mars/statistics"
+      #- "${POLYTOPE_WORKER_TMP_VOL}:/tmp"
+    networks:
+      - polytope
+      #- dockernet
+
+  testrunner:
+    image: {{ build_registry }}/polytope-common:{{ build_tag }}
+    build:
+      context: ../../
+      dockerfile: polytope-deployment/common/Dockerfile
+      target: polytope-common
+      args:
+        proxy: {{ build_proxy }}
+    deploy:
+      replicas: {{ config['deployment']['testrunner']['replicas'] }}
+    environment:
+      - POLYTOPE_PROXY={{ polytope_proxy }}
+    configs:
+      - source: default
+        target: /etc/polytope/config.yaml
+    networks:
+      - polytope
+    command: /bin/sh -c "tail -f /dev/null"
+
+  ingress:
+    image: nginx:1.16
+    deploy:
+      replicas: {{ config['deployment']['ingress']['replicas'] }}
+    ports:
+      - "0.0.0.0:{{ config['deployment']['ingress']['port'] }}:{{ config['deployment']['ingress']['port'] }}"
+    configs:
+      - source: ingress
+        target: /etc/nginx/conf.d/default.conf
+      {% if 'https' in config['deployment']['ingress'] %}
+      - source: ingress_key
+        target: /etc/nginx/polytope_private_key.pem
+      - source: ingress_cert_chain
+        target: /etc/nginx/polytope_cert_chain.pem
+      {% endif %}
+    networks:
+      - polytope

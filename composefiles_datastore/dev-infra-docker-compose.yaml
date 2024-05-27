@@ -1,0 +1,17 @@
+services:
+  redis:
+    extends:
+      file: ../base/compose.yaml
+      service: base-service
+    image: redis:6-alpine
+    restart: always
+    networks:
+      internal-bridge:
+        aliases:
+          - redis
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+
+networks:
+  internal-bridge:
+    name: internal-bridge

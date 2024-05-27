@@ -1,0 +1,8 @@
+services:
+    <%= packageName %>:
+        build:
+            context: <%= packagePath %>/docker
+            args:
+                UID: ${uid:-1000}
+        volumes:
+            - ./<%= packagePath %>:/usr/src/project/<%= packagePath %>

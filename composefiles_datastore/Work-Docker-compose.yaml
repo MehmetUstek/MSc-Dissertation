@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+mysqldb:
+  hostname: sql
+  image: mysql:8.0.28
+  container_name: mysqldb
+  restart: unless-stopped
+  environment:
+    - MYSQLDB_USER=root
+    - MYSQL_ROOT_PASSWORD=root
+    - MYSQL_DATABASE=Airport
+    - MYSQLDB_DOCKER_PORT=3306
+
+app:
+  build: ./
+  container_name: 'java-app'
+  ports:
+    -8082:8082
+

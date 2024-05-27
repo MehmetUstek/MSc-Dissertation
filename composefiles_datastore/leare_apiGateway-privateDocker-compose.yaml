@@ -1,0 +1,355 @@
+version: '3.8'
+
+services:
+  #movil-proxy
+  movil-proxy:
+    build:
+      context: ../leare_proxy_movil
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - leare-network
+  # Gateway
+  leare-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      # dockerfile: Dockerfile.dev
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - leare-network
+  # auth_ms
+
+  auth-db:
+    build:
+      context: ../leare_auth_ms
+      dockerfile: db.Dockerfile
+    user: root
+    volumes:
+      - ../db/leare_auth_db:/var/opt/mssql/data
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123
+    ports:
+      - ":1433"
+    mem_limit: 2048m
+    networks:
+      - leare-network
+
+  auth-web:
+    build:
+      context: ../leare_auth_ms
+      dockerfile: Dockerfile
+    ports:
+      - :8080
+    depends_on:
+      - auth-db
+    networks:
+      - leare-network
+
+  # chat_ms
+
+  chat-db:
+    image: mongo:7.0
+    volumes:
+      - ../db/leare_chat_db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - ":27017"
+    networks:
+      - leare-network
+
+  chat-web:
+    build:
+      context: ../leare_chat_ms
+      # dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
+    ports:
+      - ":3002"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_URL: mongodb://root:password@mongo:27017/
+    depends_on:
+      - chat-db
+    networks:
+      - leare-network
+
+
+  # courses_ms
+  courses-db:
+    image: postgres:16.2-alpine
+    volumes:
+      - ../db/leare_courses_db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_PORT: 5490
+    ports:
+      - ":5490"
+    networks:
+      - leare-network
+    command: -p 5490
+    
+
+  courses-web:
+    build:
+      context: ../leare_courses_ms
+      dockerfile: Dockerfile
+    ports:
+      - ":3003"
+    depends_on:
+      - courses-db
+    networks:
+      - leare-network
+
+
+  #document_ms
+  document-rabbit:
+    image: rabbitmq:management
+    ports:
+      - ":5672"
+      - ":15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: arquisoft
+      RABBITMQ_DEFAULT_PASS: password
+    healthcheck:   
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running"]
+      interval: 50s
+      timeout: 4s
+      retries: 5
+      start_period: 3m
+    networks:
+      - leare-network
+
+  document-db:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data -port 3014"
+    image: "amazon/dynamodb-local:latest"
+    container_name: document-db
+    working_dir: /home/dynamodblocal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' http://localhost:3014 | grep -E '400|200'"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+      start_period: 40s
+    volumes:
+     - dynamodb_data:/home/dynamodblocal/data
+    networks:
+      - leare-network
+
+
+  file-storage:
+    image: localstack/localstack:s3-latest
+    environment:
+      - services=s3
+      - DEBUG=${DEBUG:-0}
+    volumes:
+      - file_storage_data:/var/lib/localstack
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - leare-network
+
+  document-server:
+    build:
+      context: ../leare_document_ms
+      dockerfile: Dockerfile.server
+    ports:
+      - ":3004"
+    volumes:
+      - ../leare_document_ms/temp:/temp
+      - ../leare_document_ms/logs:/logs
+    depends_on:
+      document-db:
+        condition: service_healthy
+    networks:
+      - leare-network
+
+  document-sidecar:
+    build:
+      context: ../leare_document_ms
+      dockerfile: Dockerfile.sidecar
+    volumes:
+      - ../leare_document_ms/temp:/temp
+      - ../leare_document_ms/logs:/logs
+    depends_on:
+      document-db:
+        condition: service_healthy
+      document-rabbit:
+        condition: service_healthy
+    networks:
+      - leare-network
+
+
+  # search_ms
+
+  search-db:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: search-db
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - ":9200"
+    networks:
+      - leare-network
+
+  search-web:
+    build:
+      context: ../leare_search_ms
+      dockerfile: Dockerfile
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=3005
+      - ELASTICSEARCH_URL=http://search-db:9200
+      # - ELASTICSEARCH_URL=http://elastic:password@search-db:9200
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=password
+    ports:
+      - ":3005"
+    depends_on:
+      - search-db
+    networks:
+      - leare-network
+
+  # user_ms
+  users-db:
+    image: mariadb
+    volumes:
+      - ../db/leare_users_db:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: my_app_development
+      # MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - ":3307"
+    networks:
+      - leare-network
+
+  users-web:
+    build:
+      context: ../leare_users_ms
+      dockerfile: Dockerfile
+    container_name: users-web
+    volumes:
+      - ../leare_users_ms:/app
+    ports:
+      - ":3000"
+    depends_on:
+      - users-db
+    environment:
+      # DATABASE_URL: mysql2://root@users-db/my_app_development
+      DATABASE_URL: mysql2://root:password@users-db/my_app_development
+    networks:
+      - leare-network
+
+
+  # ws
+  ws:
+    build:
+      context: ../leare_ws
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      CHAT_MS_URL: "http://chat-web:3002"
+    depends_on:
+      - chat-web
+    networks:
+      - leare-network
+
+  leare-ldap:
+    image: osixia/openldap:1.1.8
+    environment:
+      COMPOSE_HTTP_TIMEOUT: 200
+      LDAP_LOG_LEVEL: "256"
+      LDAP_ORGANISATION: "Leare"
+      LDAP_DOMAIN: "leare.co"
+      LDAP_BASE_DN: ""
+      LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_CONFIG_PASSWORD: "config"
+      LDAP_READONLY_USER: "false"
+      LDAP_BACKEND: "hdb"
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
+      LDAP_TLS_PROTOCOL_MIN: "3.1"
+      LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_REPLICATION: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+    tty: true
+    stdin_open: true
+    volumes:
+      - /var/lib/ldap
+      - /etc/ldap/slapd.d
+      - /container/service/slapd/assets/certs/
+    ports:
+      - "389:389"
+      - "636:636"
+    hostname: "leare.co"
+    networks:
+      - leare-network
+  
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "leare-ldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+        - "8085:80"
+    links:
+        - leare-ldap
+    networks:
+        - leare-network
+
+  int-rp:
+    build:
+      context: ../leare_int
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "3048:3048"
+      - "3047:3047"
+    networks:
+      - leare-network
+
+  leare-int:
+    build:
+      context: ../leare_int
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - leare-network
+
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
+  dynamodb_data:
+    driver: local
+  file_storage_data:
+    driver: local
+
+networks:
+  leare-network:
+    driver: bridge

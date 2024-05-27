@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  extract:
+    build: . 
+    container_name: jsonschema
+    ports:
+      - "4200:4200"
+    depends_on:
+      - mongo
+    environment:
+      - MONGODB_URI=mongodb://mongoadmin:secret@mongodb:27017/jsonschemadiscovery?authSource=admin
+      - SECRET_TOKEN=talkischeapshowmethecode
+    links:
+      - mongo
+    command: npm run dev
+
+  mongo:
+    container_name: mongodb
+    ports:
+      - '27888:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongoadmin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    image: mongo  
+    

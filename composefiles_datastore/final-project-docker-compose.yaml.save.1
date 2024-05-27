@@ -1,0 +1,55 @@
+networks: 
+  int_net:
+  proxy_net:
+  ext_net:
+services: 
+  mysql: 
+    build: 
+      context: "."
+      dockerfile: mysql.Dockerfile
+    environment: 
+      - MYSQL_ROOT_PASSWORD=XMN347
+      - MYSQL_DATABASE=dbwpkuasai
+      - MYSQL_USER=cilsykuasaiuser
+      - MYSQL_PASSWORD=cilsykuasaipassword
+    image: mysql-custom
+    networks: 
+      - int_net
+    volumes: 
+      - "db-data:/var/lib/mysql"
+  phpmyadmin: 
+    build: 
+      context: "."
+      dockerfile: pma.Dockerfile
+    environment: 
+      - PMA_HOST=mysql
+    image: pma-custom
+    networks: 
+      - int_net
+      - proxy_net
+    restart: always
+  
+proxy: 
+    build: 
+      context: "."
+      dockerfile: proxy.Dockerfile
+    image: proxy-custom
+    networks: 
+      - proxy_net
+      - ext_net
+    ports: 
+      - "80:80"
+  web: 
+    build: 
+      context: "."
+      dockerfile: webserver.Dockerfile
+    image: web-custom
+    networks: 
+      - proxy_net
+      - int_net
+    volumes: 
+      - "web:/var/www/html/"
+version: "3.1"
+volumes:
+  web:
+  db-data:

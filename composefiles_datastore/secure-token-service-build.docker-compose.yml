@@ -1,0 +1,22 @@
+version: '3.1'
+services:
+  sts-maven:
+    image: adorsys/ci-build:latest
+    volumes:
+      - ./:/opt/src
+      - ./.docker-build/.m2:/tmp/m2
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xmx2048m
+      - MAVEN_OPTS=-Dmaven.repo.local=/tmp/m2/repository
+    working_dir: /opt/src
+    entrypoint: ""
+    command:
+      - /opt/src/docker/build.cmd.sh
+  sts-client:
+    image: adorsys/ci-build:latest
+    volumes:
+      - ./sts-client-example:/opt/src
+    working_dir: /opt/src
+    entrypoint: ""
+    command:
+      - /opt/src/docker/compile/build.cmd.bash

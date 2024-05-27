@@ -1,0 +1,23 @@
+≈©version: "2"
+
+volumes:
+    db_data:
+
+services:
+    php-shop-demo:
+        build: ./nginx
+        ports:
+            - 8181:8000
+        volumes:
+            - ./src:/usr/data
+            - /usr/data/vendor
+            - /usr/data/var
+        privileged: true
+        environment:
+            - TOKEN=wOkJjVCcAVXfTnJK6KcVxQ
+            - HOST=my-webserver
+            - REALM=us0
+            - BUYMETRIC=ecointet.shop
+            - BACKGROUND=
+            - LOGO=
+            - EMAIL=ecointet@signalfx.com

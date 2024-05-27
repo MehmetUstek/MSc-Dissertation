@@ -1,0 +1,39 @@
+version: '3'
+services:
+  ecomapp:
+    image: ecomapp:dev
+    container_name: app_main
+    restart: always
+    ports:
+      - 3000:3000
+    working_dir: /expressJS
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      MYSQL_DB: node-complete
+  mysql:
+    image: mysql:8.0.33
+    container_name: app_mysql
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - dbdata:/var/lib/mysql
+  mongo:
+    image: mongo:6.0.6
+    container_name: app_mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodata:/data/db
+
+volumes:
+  dbdata:
+  mongodata:

@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  mal_export:
+    container_name: mal_export
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ubuntu_version: {{ docker.image_version.ubuntu }}
+    restart: unless-stopped
+    environment:
+      TZ: {{ system.timezone }}
+    volumes:
+      - type: bind
+        source: "{{ resilio_sync.sync_path.sub.mal_export_path }}"
+        target: "/export"
+      - type: bind
+        source: "{{ data_path.library.mal_export }}/mal_export.log"
+        target: "/mal_export.log"
+      - type: bind
+        source: "{{ data_path.library.mal_export }}/myanimelist-export.yaml"
+        target: "/root/.config/myanimelist-export.yaml"
+      - "/etc/localtime:/etc/localtime:ro"

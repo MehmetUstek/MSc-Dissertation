@@ -1,0 +1,38 @@
+  #
+  # Deluge + VPN - Deluge with PIA VPN connection built in
+  #
+  deluge-pia:
+    image: binhex/arch-delugevpn
+    container_name: deluge-pia
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=000
+      - VPN_ENABLED=yes
+      - VPN_USER=xxxxxx
+      - VPN_PASS=xxxxxxx
+      - VPN_PROV=pia
+      - VPN_CLIENT=openvpn
+      - STRICT_PORT_FORWARD=yes
+      - ENABLE_PRIVOXY=yes
+      - LAN_NETWORK=192.168.1.0/24
+      - NAME_SERVERS=84.200.69.80,37.235.1.174,1.1.1.1,37.235.1.177,84.200.70.40,1.0.0.1
+      - DELUGE_DAEMON_LOG_LEVEL=info
+      - DELUGE_WEB_LOG_LEVEL=info
+      - VPN_INPUT_PORTS=1234
+      - VPN_OUTPUT_PORTS=5678
+      - DEBUG=false
+    ports:
+      - 8112:8112
+      - 8118:8118
+      - 58846:58846
+      - 58946:58946
+    volumes:
+      - ${USERDIR}/deluge-pia/data:/data
+      - ${USERDIR}/deluge-pia/config:/config
+      - ${MEDIA}/delugev2/downloading:/downloads-v2
+      - ${MEDIA}/delugev2/autoadd:/autoadd
+      - ${MEDIA}/delugev2/autoaddhistory:/autoaddhistory

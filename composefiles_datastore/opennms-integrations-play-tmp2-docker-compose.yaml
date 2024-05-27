@@ -1,0 +1,50 @@
+---
+version: '3'
+
+volumes:
+  data-postgres: {}
+  data-opennms: {}
+  data-opennms-cfg: {}
+  data-cgroup: {}
+
+services:
+
+
+
+# centos 8 container for tables
+  centos8tables:
+    image: san0123/centos8-apache24-php73:php-fpm
+    container_name: centos8tables
+    hostname: centos8tables
+    privileged: true
+
+    # this keeps the container alive 
+    # see https://stackoverflow.com/questions/30209776/docker-container-will-automatically-stop-after-docker-run-d
+    # command: sleep infinity
+    ports:
+      - "11122:22" # ssh
+      - "10080:80" # httpd
+
+# first snmp container
+  cameranetsnmp1:
+    image: polinux/snmpd
+    container_name: cameranetsnmp1
+    hostname: cameranetsnmp1
+    ports:
+      - "11161:161/udp"
+
+#second snmp container
+  cameranetsnmp2:
+    image: polinux/snmpd
+    container_name: cameranetsnmp2
+    hostname: cameranetsnmp2
+    ports:
+      - "12161:161/udp"
+
+#third snmp container
+  cameranetsnmp3:
+    image: polinux/snmpd
+    container_name: cameranetsnmp3
+    hostname: cameranetsnmp3
+    ports:
+      - "13161:161/udp"

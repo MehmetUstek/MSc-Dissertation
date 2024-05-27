@@ -1,0 +1,11 @@
+services:
+  sensinact-sample:
+    build: ..
+    stdin_open: true
+    tty: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./configuration.json:/opt/sensinact/configuration/configuration.json:ro
+      - ./ext-features:/opt/sensinact/ext-features:ro
+      - ./ext-repository:/opt/sensinact/ext-repository:ro

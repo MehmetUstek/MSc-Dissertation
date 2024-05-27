@@ -1,0 +1,101 @@
+# Copyright 2017 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: "3.8"
+
+services:
+  gateway:
+    container_name: kong-gateway
+    image: kong/kong-gateway:3.6
+    environment:
+      - "KONG_DATABASE=off"
+      - "KONG_PROXY_ACCESS_LOG=/dev/stdout"
+      - "KONG_DECLARATIVE_CONFIG=/kong/declarative/kong.yml"
+      - "KONG_ADMIN_ACCESS_LOG=/dev/stdout"
+      - "KONG_PROXY_ERROR_LOG=/dev/stderr"
+      - "KONG_ADMIN_ERROR_LOG=/dev/stderr"
+      - "KONG_DNS_ORDER=LAST,A,CNAME"
+    volumes:
+      - ${PWD}/hack/gateway/prod.kong.yml:/kong/declarative/kong.yml
+    ports:
+      - "8080:8000"
+      - "8443:8443"
+
+  auth:
+    container_name: dashboard-auth
+    build:
+      context: ../../modules
+      dockerfile: auth/Dockerfile
+      args:
+        VERSION: ${VERSION:?}
+    command:
+      - "--kubeconfig=${KUBECONFIG:?}"
+    volumes:
+      - ${KUBECONFIG:?}:${KUBECONFIG:?} # Required - local kubeconfig path resolves to $HOME/<user>/.kube/config
+    tmpfs:
+      - /tmp
+
+  api:
+    container_name: dashboard-api
+    build:
+      context: ../../modules
+      dockerfile: api/Dockerfile
+      args:
+        VERSION: ${VERSION:?}
+    command:
+      --kubeconfig=${KUBECONFIG:?}
+      --sidecar-host=${SIDECAR_HOST:?}
+    volumes:
+      - ${KUBECONFIG:?}:${KUBECONFIG:?} # Required - local kubeconfig path resolves to $HOME/<user>/.kube/config
+    tmpfs:
+      - /tmp
+
+  web:
+    container_name: dashboard-web
+    build:
+      context: ../..
+      dockerfile: modules/web/Dockerfile
+      args:
+        VERSION: ${VERSION:?}
+        WEB_BUILDER_ARCH: ${WEB_BUILDER_ARCH:?}
+    command:
+      - "--kubeconfig=${KUBECONFIG:?}"
+      - "--system-banner=${SYSTEM_BANNER:?}"
+      - "--system-banner-severity=${SYSTEM_BANNER_SEVERITY:?}"
+    volumes:
+      - ${KUBECONFIG:?}:${KUBECONFIG:?} # Required - local kubeconfig path resolves to $HOME/<user>/.kube/config
+    tmpfs:
+      - /tmp
+
+  scraper:
+    container_name: metrics-scraper
+    build:
+      context: ../../modules
+      dockerfile: metrics-scraper/Dockerfile
+      args:
+        VERSION: ${VERSION:?}
+    command:
+      --kubeconfig=${KUBECONFIG:?}
+      --metric-resolution=5s
+      --metric-duration=10m
+    volumes:
+      - ${KUBECONFIG:?}:${KUBECONFIG:?}
+    shm_size: 1G
+    tmpfs:
+      - /tmp
+
+networks:
+  default:
+    name: kind
+    external: true

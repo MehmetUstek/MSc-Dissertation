@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:2.10
+    restart: unless-stopped
+    ports:
+    - "80:80"
+    - "443:443"
+    networks:
+    - reverseproxy
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./traefik.yaml:/traefik.yaml:ro
+    - ./configs:/configs:ro
+    - ./acme:/acme
+
+networks:
+  reverseproxy:
+    external: true

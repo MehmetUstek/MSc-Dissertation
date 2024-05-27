@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  clickhouse:
+    restart: always
+    container_name: ck21
+    image: ${docker_io}/clickhouse/clickhouse-server:21.3.20
+    environment:
+      CLICKHOUSE_USER: ck-dev
+      CLICKHOUSE_PASSWORD: x6YOIcRT42oR0zmgTG7n
+    expose:
+      - 9000
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    # mkdir -p /opt/ck/{data,conf,logs}
+    volumes:
+      - ${server_dir}/ck/data:/var/lib/clickhouse
+      - ${server_dir}/ck/logs:/var/log
+      - ${server_dir}/ck/conf/conf.d:/etc/clickhouse-server/conf.d
+      # - env 需要替换 users.xml 文件
+      # - ${server_dir}/ck/conf/users.xml:/etc/clickhouse-server/users.xml

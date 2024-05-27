@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  database:
+    networks:
+      - trakz-server-network
+    image: mysql:8.0
+    restart: 'unless-stopped'
+    container_name: trakz-server
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234@5
+      - MYSQL_DATABASE=trakz
+      - MYSQL_USER=mfaouzi
+      - MYSQL_PASSWORD=1234@5
+#      - HOST=165.22.73.83
+    ports:
+      - '3307:3306'
+    volumes:
+      - trakz-server-volume:/var/lib/mysql
+
+  php-myadmin:
+    networks:
+      - trakz-server-network
+    depends_on:
+      - database
+    image: phpmyadmin:5-apache
+    restart: always
+    ports:
+      - '5001:80'
+    environment:
+      - PMA_HOST=trakz-server
+      - MYSQL_ROOT_PASSWORD=1234@5
+
+volumes:
+  trakz-server-volume:
+
+networks:
+  trakz-server-network:

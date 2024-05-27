@@ -1,0 +1,60 @@
+name: eco3s
+services:
+  db:
+    build:
+      context: ./docker/db
+    restart: always
+    volumes:
+      # default to `data` volume
+      - type: volume
+        source: db-data
+        # the path where all data will be stored
+        target: /var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD
+    networks:
+      - db-connection
+    # ports:
+    #   - 5432:5432
+  # main application, API backend
+  api:
+    build:
+      # find Dockerfile in root
+      context: .
+      # in development process, do not bundle code
+      # to make it easier to inspect
+      target: build
+    # in development process, shuts down container that has any issue
+    restart: on-failure:2
+    environment:
+      - DATABASE_URL
+    networks:
+      - db-connection
+      - proxy-connection
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+  # reverse proxy, image cache
+  proxy:
+    # build context where Dockerfile is located
+    build: ./docker/proxy
+    restart: on-failure:1
+    environment:
+      NGINX_HOST: localhost
+      NGINX_PROXY_HOST: api
+      NGINX_PORT: 80
+      NGINX_PROXY_ROUTE: api
+      NGINX_PROXY_PORT: 3000
+    networks:
+      - proxy-connection
+    ports:
+      - 8080:80
+volumes:
+  # persistent data volume for database
+  db-data:
+networks:
+  db-connection:
+    driver: bridge
+  proxy-connection:
+    driver: bridge
