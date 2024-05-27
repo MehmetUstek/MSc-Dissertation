@@ -9,7 +9,9 @@ services:
     cpus: 0.5
     # security_opt:
     #   - no-new-privileges:true
-    privileged: true
+    environment:
+      - PASSWORD = "root"
+    privileged: false
     user: "root"
     
   # db:
