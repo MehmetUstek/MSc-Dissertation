@@ -110,66 +110,66 @@ import re
 
 
 # Check missing configurations function
-# def check_missing_configurations(ast, required_configurations, alerts, compose_error_descriptions):
-#     """Checks for missing configurations in the AST."""
-#     if isinstance(ast, dict):
-#         for config in required_configurations:
-#             config_details = config.get('services', {}).get('service', {})
-#             error_no = config.get('errorNo', 'Unknown error number')
-#             severity = config.get('severity', 'Unknown severity number')
-#             is_value_expected = config.get('expectedValue', False)
-#             # print(ast.items())
+def check_missing_configurations(ast, required_configurations, alerts, compose_error_descriptions):
+    """Checks for missing configurations in the AST."""
+    if isinstance(ast, dict):
+        for config in required_configurations:
+            config_details = config.get('path', {}).get('services', {}).get('service', {})
+            error_no = config.get('errorNo', 'Unknown error number')
+            severity = config.get('severity', 'Unknown severity number')
+            is_value_expected = config.get('expectedValue', False)
+            # print(ast.items())
 
-#             for service_name, service_config in ast.items():
-#                 for key, expected_value in config_details.items():
-#                     if key not in service_config:
-#                         alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
-#                     elif is_value_expected and isinstance(expected_value, str):
-#                         if not re.search(expected_value, str(service_config.get(key, ''))):
-#                             alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
-#                     elif isinstance(expected_value, dict):
-#                         for subkey, subvalue in expected_value.items():
-#                             if subkey not in service_config[key] or service_config[key][subkey] != subvalue:
-#                                 alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
+            for service_name, service_config in ast.get('services', {}).items():
+                for key, expected_value in config_details.items():
+                    if key not in service_config:
+                        alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
+                    elif is_value_expected and isinstance(expected_value, str):
+                        if not re.search(expected_value, str(service_config.get(key, ''))):
+                            alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
+                    elif isinstance(expected_value, dict):
+                        for subkey, subvalue in expected_value.items():
+                            if subkey not in service_config[key] or service_config[key][subkey] != subvalue:
+                                alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
 
-#     elif isinstance(ast, list):
-#         for item in ast:
-#             check_missing_configurations(item, required_configurations, alerts, compose_error_descriptions)
+    elif isinstance(ast, list):
+        for item in ast:
+            check_missing_configurations(item, required_configurations, alerts, compose_error_descriptions)
 
-def navigate_and_check(service_config, path):
-    """ Recursively navigate and check according to the nested dictionary path. """
-    if isinstance(path, dict):
-        for key, sub_path in path.items():
-            # print(key, service_config)
-            if key in service_config:
-                return navigate_and_check(service_config[key], sub_path)
-            else:
-                return None, []  # Key not found, return empty list for expected values
-    elif isinstance(path, list):
-        return service_config, path  # Return current config and the list of expected values
+# def navigate_and_check(service_config, path):
+#     """ Recursively navigate and check according to the nested dictionary path. """
+#     if isinstance(path, dict):
+#         for key, sub_path in path.items():
+#             print(key, service_config)
+#             if key in service_config:
+#                 return navigate_and_check(service_config[key], sub_path)
+#             else:
+#                 return None, []  # Key not found, return empty list for expected values
+#     elif isinstance(path, list):
+#         return service_config, path  # Return current config and the list of expected values
 
-    return None, []  # Default case, if path handling does not match any expected type
+#     return None, []  # Default case, if path handling does not match any expected type
 
-def check_missing_configurations(ast, configurations,compose_error_descriptions):
-    alerts = []
-    for config in configurations:
-        path_dict = config['path']
-        error_no = str(config['errorNo'])
-        severity = config['severity']
+# def check_missing_configurations(ast, configurations,compose_error_descriptions):
+#     alerts = []
+#     for config in configurations:
+#         path_dict = config['path']
+#         error_no = str(config['errorNo'])
+#         severity = config['severity']
 
-        for service_name, service_config in ast.items():
-            result, expected_values = navigate_and_check(service_config, path_dict)
-            # print(result)
-            if result is None or not expected_values:  # Check if there's no result or no expected values
-                alerts.append((f"Missing or incorrect configuration in '{service_name}'", severity))
-            else:
-                for expected in expected_values:
-                    if ':' in expected:  # Ensure the format is key:value
-                        key, value = expected.split(':')
-                        if key not in result or str(result[key]) != value:
-                            alerts.append((f"Configuration mismatch at '{key}' in '{service_name}': expected {value}", severity))
-                    else:
-                        if expected not in result:
-                            alerts.append((f"Missing key '{expected}' in '{service_name}'", severity))
+#         for service_name, service_config in ast.items():
+#             result, expected_values = navigate_and_check(service_config, path_dict)
+#             print(result)
+#             if result is None or not expected_values:  # Check if there's no result or no expected values
+#                 alerts.append((f"Missing or incorrect configuration in '{service_name}'", severity))
+#             else:
+#                 for expected in expected_values:
+#                     if ':' in expected:  # Ensure the format is key:value
+#                         key, value = expected.split(':')
+#                         if key not in result or str(result[key]) != value:
+#                             alerts.append((f"Configuration mismatch at '{key}' in '{service_name}': expected {value}", severity))
+#                     else:
+#                         if expected not in result:
+#                             alerts.append((f"Missing key '{expected}' in '{service_name}'", severity))
 
-    return alerts
+#     return alerts

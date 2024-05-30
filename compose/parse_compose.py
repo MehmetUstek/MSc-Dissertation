@@ -56,6 +56,7 @@ def create_ast(node):
         ast_node = {}
         for key, value in node.items():
             # Recursively process each item
+            # print("key-val", key, value)
             ast_node[key] = create_ast(value)
         return ast_node
     
@@ -63,8 +64,21 @@ def create_ast(node):
     elif isinstance(node, list):
         return [create_ast(item) for item in node]
     
+    #TODO: Think later
+    # elif isinstance(node, str):
+    #     if "=" in node:
+    #         ast_node = {}
+    #         key_equal, valu_equal = node.split("=")
+    #         # print("key_equal",key_equal)
+    #         # print("valu_equal",valu_equal)
+    #         # return [create_ast(item) for item in node_arr]
+    #         ast_node[key_equal] = create_ast(valu_equal)
+    #         return ast_node
+    #     else:
+    #         return node
+    
     # If the node is a terminal (leaf node), simply return its value
-    else:
+    else:   
         return node
 
 # # Example usage

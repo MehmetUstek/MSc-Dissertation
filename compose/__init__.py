@@ -1,3 +1,4 @@
 from .missing_configurations import check_missing_configurations
 from .compose_vulnerability_detection import get_compose_file_vulnerabilities
-from .vectoralscan import vectoral_scan
+from .check_password import check_password_plaintext
+# from .vectoralscan import vectoral_scan

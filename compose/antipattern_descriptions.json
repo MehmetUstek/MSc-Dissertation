@@ -1,6 +1,6 @@
 {
   "1": "No passwords or secrets in the docker compose file.",
-  "2": "Limit the use of bind mounts, especially for sensitive host directories. Consider using Docker volumes instead, which are managed by Docker and provide better encapsulation and management features.",
+  "2": "Limit the use of bind mounts, especially for sensitive host directories. \n\tConsider using Docker volumes instead, which are managed by Docker and provide better encapsulation and management features.",
   "3": "Open/Accessible Port",
   "4": "Two images share volume locations in the disk.",
   "5": "Weak Permissions",
@@ -14,5 +14,5 @@
   "13": "Do not specify privileged images.",
   "14": "User should not be root.",
   "15": "Using 'latest' tag, which may lead to unstable builds.",
-  "16": "Use init option in the docker file image. Example: app:\n\timage: your_image \n\t\tinit: true"
+  "16": "Use init option in the docker file image. Example: \n  app:\n\timage: your_image \n\t\tinit: true"
 }

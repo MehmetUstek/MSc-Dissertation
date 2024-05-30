@@ -100,8 +100,10 @@
 
   {
     "path": {
-      "service": {
-        "init": true
+      "services": {
+        "service": {
+          "init": true
+        }
       }
     },
     "errorNo": 16,
