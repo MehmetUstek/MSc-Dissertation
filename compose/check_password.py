@@ -11,7 +11,7 @@ def check_password_plaintext(password):
     str: Description of the password format.
     """
     # Regex to match template-like patterns e.g., {{ var_name }}
-    template_pattern = r"\{\{\s*[\w_]+\s*\}\}"
+    template_pattern = r"\{\{\s*[\w_]+\s*\}\}|\$\{\s*[\w_]+\s*\}"
     
     # Check if the password matches the template pattern
     if re.match(template_pattern, password):

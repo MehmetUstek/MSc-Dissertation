@@ -14,5 +14,6 @@
   "13": "Do not specify privileged images.",
   "14": "User should not be root.",
   "15": "Using 'latest' tag, which may lead to unstable builds.",
-  "16": "Use init option in the docker file image. Example: \n  app:\n\timage: your_image \n\t\tinit: true"
+  "16": "Use init option in the docker file image. Example: \n  app:\n    image: your_image \n      init: true",
+  "17": "Port 22 (SSH default) is exposed"
 }

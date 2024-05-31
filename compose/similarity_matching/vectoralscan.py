@@ -25,22 +25,24 @@ def tree_vector(tree, model):
                 node_vector = model.wv[node_type]  # Get the embedding vector
                 # print(node_vector)
                 vector = [sum(x) for x in zip(vector, node_vector)]  # Sum up vectors
+                
             if isinstance(subtree, dict):
                 subtree_vector, _ = tree_vector(subtree, model)  # Recursively process the subtree
                 vector = [sum(x) for x in zip(vector, subtree_vector)]  # Sum up vectors
             elif isinstance(subtree, list):
-                print("listsubtree", subtree)
-                for element in subtree:
-                    print("element",element)
-                    element_subtree_vector, _ = tree_vector(element, model)  # Recursively process the subtree
-                    vector = [sum(x) for x in zip(vector, element_subtree_vector)]  # Sum up vectors
+                for item in subtree:
+                    item_vector, _ = tree_vector(item, model) # TODO: Change this.
+                    vector = [sum(x) for x in zip(vector, item_vector)]
 
             elif isinstance(subtree, str) or isinstance(subtree, bool):
-                print("strsubtree", subtree)
+                # print("strsubtree", subtree)
                 if str(subtree) in model.wv:
                     # print("subtree_bool_error", node_type,  subtree)
                     subtree_vector = model.wv[subtree]
                     vector = [sum(x) for x in zip(vector, subtree_vector)]
+                elif str(node_type) not in model.wv:
+                    # TODO: Bypass vector and do checks like PASSWORD = root.
+                    pass
                 subtree_value = subtree # Maybe else is useful in here?
 
 
@@ -50,11 +52,11 @@ def tree_vector(tree, model):
             vector = [sum(x) for x in zip(vector, item_vector)]  # Sum up vectors
 
     elif isinstance(tree, str) or isinstance(tree, bool):
-        print("strsubtree", tree)
-        if str(tree) in model.wv:
-            # print("subtree_bool_error", node_type,  subtree)
-            item_vector = model.wv[tree]
-            vector = [sum(x) for x in zip(vector, item_vector)]
+        print("strsubtree22", tree)
+        # if str(tree) in model.wv:
+        #     # print("subtree_bool_error", node_type,  subtree)
+        #     item_vector = model.wv[tree]
+        #     vector = [sum(x) for x in zip(vector, item_vector)]
         subtree_value = tree # Maybe else is useful in here?
 
     return vector, subtree_value
@@ -105,14 +107,16 @@ def traverse_and_compare(ast, antipattern_vector, error, severity, logger, depth
                 # print("antipattern_vector",antipattern_vector)
                 branch_vector, ast_subtree_value = tree_vector(item_dict, node_embeddings)  # Ensure you adjust this call according to your vector generation logic
                 similarity = cosine_similarity(branch_vector, antipattern_vector)
-                print("cosine similarity:", similarity)
+                # print("cosine similarity:", similarity)
                 def print_severity_message():
-                    print_severity(logger, severity, f"{compose_error_descriptions[str(error)]} \n\tHigh similarity found: {similarity} in branch {new_path}, in ast: {item_dict} with depth:{depth}\n")
+                    print_severity(logger, severity, f"{compose_error_descriptions[str(error)]} \n\tHigh similarity found: {similarity} in branch {new_path}, in ast: {item_dict} \n")# with depth:{depth}
+                # print('antipattern_subtree_value',antipattern_subtree_value)
 
                 if similarity > 0.85:
                     # print("antipattern_subtree_value",antipattern_subtree_value)
                     # print("ast_subtree_value",ast_subtree_value)
                     if antipattern_subtree_value != "":
+
                         if ast_subtree_value != "":
                             if str(antipattern_subtree_value) not in str(ast_subtree_value):
                                 continue
@@ -178,7 +182,7 @@ def to_vector_and_fetch_vulnerabilities(ast, antipattern_tree,antipattern_min_de
 
 def get_vectoral_vulnerability(compose_file_path,antipattern_tree,antipattern_min_depth, antipattern_depth, error, severity, logger):
     compose_ast = parse_yaml_to_ast(compose_file_path)
-    print("compose_ast",compose_ast)
+    # print("compose_ast",compose_ast)
     to_vector_and_fetch_vulnerabilities(compose_ast, antipattern_tree,antipattern_min_depth, antipattern_depth, error, severity, logger)
 
 def vectoral_scan(compose_file_path):

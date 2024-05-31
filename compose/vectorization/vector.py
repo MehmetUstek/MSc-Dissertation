@@ -43,7 +43,7 @@ print("trees", trees)
 sequences = prepare_data(trees)
 
 # Train Word2Vec model
-model = Word2Vec(sentences=sequences, vector_size=70, window=5, min_count=3, workers=4,negative=10,              # If > 0, negative sampling will be used
+model = Word2Vec(sentences=sequences, vector_size=40, window=5, min_count=100, workers=4,negative=10,              # If > 0, negative sampling will be used
 epochs=100 )
 # # TODO: I chosed a min_count to be 3 this time.
 

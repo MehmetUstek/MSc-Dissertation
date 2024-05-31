@@ -1,0 +1,69 @@
+{
+  "version": "",
+  "services": {
+    "build": {},
+    "cap_add": [],
+    "cap_drop": [],
+    "cgroup_parent": "",
+    "command": "",
+    "configs": [],
+    "container_name": "",
+    "depends_on": [],
+    "deploy": {},
+    "devices": [],
+    "dns": [],
+    "dns_search": [],
+    "entrypoint": "",
+    "environment": {},
+    "expose": [],
+    "external_links": [],
+    "extra_hosts": {},
+    "healthcheck": {},
+    "image": "",
+    "init": "",
+    "isolation": "",
+    "labels": {},
+    "links": [],
+    "logging": {},
+    "network_mode": "",
+    "networks": {},
+    "pid": "",
+    "ports": [],
+    "privileged": "",
+    "read_only": "",
+    "restart": "",
+    "secrets": [],
+    "security_opt": [],
+    "shm_size": "",
+    "stop_grace_period": "",
+    "stop_signal": "",
+    "sysctls": {},
+    "tmpfs": [],
+    "ulimits": {},
+    "user": "",
+    "userns_mode": "",
+    "volumes": [],
+    "volumes_from": [],
+    "working_dir": ""
+  },
+  "networks": {
+    "driver": "",
+    "driver_opts": {},
+    "ipam": {},
+    "external": {}
+  },
+  "volumes": {
+    "driver": "",
+    "driver_opts": {},
+    "external": {},
+    "labels": {}
+  },
+  "configs": {
+    "external": "",
+    "file": ""
+  },
+  "secrets": {
+    "external": "",
+    "file": ""
+  }
+}

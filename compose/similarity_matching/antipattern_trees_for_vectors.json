@@ -1,6 +1,6 @@
 [
   {
-    "antipattern_tree": { "environment": ["PASSWORD"] },
+    "antipattern_tree": { "environment": [{ "PASSWORD": "root" }] },
     "antipattern_max_depth": 3,
     "antipattern_min_depth": 2,
     "errorNo": 1,
@@ -35,7 +35,7 @@
     "severity": 10
   },
   {
-    "antipattern_tree":  {"user": "root" },
+    "antipattern_tree": { "user": "root" },
     "antipattern_max_depth": 2,
     "antipattern_min_depth": 1,
     "errorNo": 14,

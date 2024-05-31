@@ -14,6 +14,6 @@ word_vectors = word2vec_model.wv
 # Open a file to write
 with open('word_vectors.txt', 'w') as file:
     for word in word_vectors.index_to_key:
-        file.write(f"Word: {word}\n")  # Convert numpy array to list for better readability
+        file.write(f"{word}\n")  # Convert numpy array to list for better readability
 
 print("Word vectors have been saved to 'word_vectors.txt'.")

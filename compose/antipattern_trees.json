@@ -5,5 +5,6 @@
   { "volumes": ["/var/run/docker.sock"], "errorNo": 6, "severity": 10 },
   { "privileged": true, "errorNo": 13, "severity": 10 },
   { "user": "root", "errorNo": 14, "severity": 10 },
-  { "image": ":latest", "errorNo": 15, "severity": 10 }
+  { "image": ":latest", "errorNo": 15, "severity": 10 },
+  { "expose": [22], "errorNo": 17, "severity": 7 }
 ]
