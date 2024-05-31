@@ -108,6 +108,9 @@ import re
 #         for item in ast:
 #             check_missing_configurations(item, required_configurations, alerts)
 
+def add_antipattern(matches, error_no, severity, service_name ):
+    matches.append({"errorNo":str(error_no),"severity":severity, "is_missing_configuration":True,"key":service_name})
+
 
 # Check missing configurations function
 def check_missing_configurations(ast, required_configurations, alerts, compose_error_descriptions):
@@ -123,14 +126,17 @@ def check_missing_configurations(ast, required_configurations, alerts, compose_e
             for service_name, service_config in ast.get('services', {}).items():
                 for key, expected_value in config_details.items():
                     if key not in service_config:
-                        alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
+                        add_antipattern(alerts, error_no, severity, service_name)
+                        
+                        # alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
                     elif is_value_expected and isinstance(expected_value, str):
                         if not re.search(expected_value, str(service_config.get(key, ''))):
-                            alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
+                            add_antipattern(alerts, error_no, severity, service_name)
                     elif isinstance(expected_value, dict):
                         for subkey, subvalue in expected_value.items():
                             if subkey not in service_config[key] or service_config[key][subkey] != subvalue:
-                                alerts.append([f"Missing or incorrect configuration in service '{service_name}': {compose_error_descriptions[str(error_no)]}", severity])
+                                add_antipattern(alerts, error_no, severity, service_name)
+
 
     elif isinstance(ast, list):
         for item in ast:

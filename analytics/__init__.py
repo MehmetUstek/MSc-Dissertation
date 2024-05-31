@@ -1,0 +1,1 @@
+from .analytics import most_frequent_vulnerabilities_in_files
