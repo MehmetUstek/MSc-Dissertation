@@ -13,7 +13,7 @@ def histogram_of_frequent_vulnerabilities(vulnerability_counts, title):
 
     plt.xlabel('Error Number')
     plt.ylabel('Number of Files with Error')
-    plt.title('Histogram of Error Numbers Across Files')
+    plt.title(title)
     plt.xticks(error_numbers)  # Ensure each error number is labeled
 
     plt.show()
@@ -24,4 +24,3 @@ def most_frequent_vulnerabilities_in_files(vulnerability_counts, title):
     print("vulnerability_counts",sorted_vulnerability_counts)
     histogram_of_frequent_vulnerabilities(sorted_vulnerability_counts, title)
 
-    
