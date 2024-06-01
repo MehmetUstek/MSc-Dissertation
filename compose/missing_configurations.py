@@ -134,8 +134,11 @@ def check_missing_configurations(ast, required_configurations, alerts, compose_e
                             add_antipattern(alerts, error_no, severity, service_name)
                     elif isinstance(expected_value, dict):
                         for subkey, subvalue in expected_value.items():
-                            if subkey not in service_config[key] or service_config[key][subkey] != subvalue:
+                            if subkey not in service_config[key]:
                                 add_antipattern(alerts, error_no, severity, service_name)
+                            elif service_config[key][subkey] != subvalue:
+                                add_antipattern(alerts, error_no, severity, service_name)
+
 
 
     elif isinstance(ast, list):

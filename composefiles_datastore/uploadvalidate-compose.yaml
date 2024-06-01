@@ -1,8 +1,8 @@
-version: '3'
+version: "3"
 
 services:
   api:
-    image: [USERNAME]/[REPOSITORY_NAME]:[API_TAG]
+    image: "[USERNAME]/[REPOSITORY_NAME]:[API_TAG]"
     networks:
       - nodenet
     depends_on:
@@ -27,7 +27,7 @@ services:
         max_attempts: 3
         window: 120s
   website:
-    image: [USERNAME]/[REPOSITORY_NAME]:[WEBSITE_TAG]
+    image: "[USERNAME]/[REPOSITORY_NAME]:[WEBSITE_TAG]"
     networks:
       - nodenet
     depends_on:

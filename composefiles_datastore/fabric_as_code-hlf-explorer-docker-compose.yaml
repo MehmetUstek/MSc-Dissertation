@@ -14,7 +14,7 @@ networks:
 services:
 
   {{hlf_explorer_db.name}}:
-    image: {{hlf_explorer_db.image}}:{{hlf_explorer_db.tag}}
+    image: "{{hlf_explorer_db.image}}:{{hlf_explorer_db.tag}}"
     container_name: {{hlf_explorer_db.name}}
     hostname: {{hlf_explorer_db.name}}
     environment:
@@ -34,7 +34,7 @@ services:
       - {{swarm_network}}
 
   {{hlf_explorer.name}}:
-    image: {{hlf_explorer.image}}:{{hlf_explorer.tag}}
+    image: "{{hlf_explorer.image}}:{{hlf_explorer.tag}}"
     container_name: {{hlf_explorer.name}}
     hostname: {{hlf_explorer.name}}
     environment:
@@ -58,7 +58,7 @@ services:
       - {{hlf_explorer.port}}:8080
    
     depends_on:
-      {{hlf_explorer_db.name}}:
+      "{{hlf_explorer_db.name}}":
       condition: service_healthy
     
     networks:

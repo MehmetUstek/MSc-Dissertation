@@ -32,7 +32,7 @@
     "path": {
       "services": {
         "service": {
-          "restart": { "on-failure": 5 }
+          "restart": "on-failure"
         }
       }
     },
@@ -74,7 +74,7 @@
     "path": {
       "services": {
         "service": {
-          "security_opt": { "no-new-privileges": true }
+          "security_opt": ["no-new-privileges"]
         }
       }
     },

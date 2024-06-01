@@ -14,8 +14,10 @@ import os
 def get_single_file_vulnerability(file_path, baseImageScan = False, isVerbose = True):
     if get_file_extension(file_path) == ".Dockerfile" or get_filename(file_path) == "Dockerfile" :
         return get_dockerfile_vulnerabilities(file_path, baseImageScan, isVerbose=isVerbose)
-    else:
+    elif get_file_extension(file_path) == ".yaml":
         return get_compose_file_vulnerabilities(file_path, isVerbose=isVerbose)
+    else:
+        return
         # vectoral_scan(file_path)
 
 
@@ -30,22 +32,24 @@ def get_directory_file_vulnerability(directory_path, isAnalytics, directory_file
     counter = 0
 
     for file in files:
+        print("fileNo:", counter)
         if counter >= directory_file_limit:
             break
         file_absolute_path = os.path.join(directory_path, file)
         print(file_absolute_path)
         vulnerabilities = get_single_file_vulnerability(file_absolute_path,isVerbose=isVerbose)
-        # error_counts = Counter(error["errorNo"] for error in vulnerabilities)
-        # print(error_counts)
-        unique_errors = set()  # Set to track unique errorNos in the current file
-        for vulnerability in vulnerabilities:
-            unique_errors.add(vulnerability["errorNo"])
-            vulnerability_counts[vulnerability["errorNo"]] += 1
-            severity_weighted_count[vulnerability["errorNo"]] += vulnerability["severity"]
+        if vulnerabilities:
+            # error_counts = Counter(error["errorNo"] for error in vulnerabilities)
+            # print(error_counts)
+            unique_errors = set()  # Set to track unique errorNos in the current file
+            for vulnerability in vulnerabilities:
+                unique_errors.add(vulnerability["errorNo"])
+                vulnerability_counts[vulnerability["errorNo"]] += 1
+                severity_weighted_count[vulnerability["errorNo"]] += vulnerability["severity"]
 
-        for error_no in unique_errors:
-            fileunique_vulnerability_counts[error_no] += 1
-        counter += 1
+            for error_no in unique_errors:
+                fileunique_vulnerability_counts[error_no] += 1
+            counter += 1
 
     if isAnalytics:
         most_frequent_vulnerabilities_in_files(fileunique_vulnerability_counts, "Unique Error Numbers Across Files")
@@ -65,7 +69,7 @@ def main():
     parser.add_argument('-fL','--fileLimit', type=int, help='Directory File Limit', required=False, default=1000)
     
     args = parser.parse_args()
-    print("args", args)
+    # print("args", args)
 
     # Here, you can add the code to handle or process the file
     if args.directory:

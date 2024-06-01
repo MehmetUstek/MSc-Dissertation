@@ -1,9 +1,8 @@
 ########### payment/wallet container configuration ############
 
-version: '2'
+version: "2"
 services:
-
-###############################################################  
+  ###############################################################
 
   monerod:
     build:
@@ -13,8 +12,8 @@ services:
         BRANCH: v0.15.0.5
         DEBIAN_VERSION: "stable-20200130-slim"
     command:
-       # remove for production use
-      -testnet 
+      # remove for production use
+      -testnet
       -data-dir /monero
       -non-interactive
     volumes:
@@ -47,17 +46,17 @@ services:
         max-size: 10m
         max-file: "3"
 
-###############################################################
+  ###############################################################
 
   bitcoind:
     image: ruimarinho/bitcoin-core:0.19-alpine
     command:
-      -printtoconsole=1
+      - printtoconsole=1
       # enable testnet
-      -testnet=1
-      -rpcallowip=127.0.0.1
-      -rpcbind=0.0.0.0
-      -rpcauth='plutus:0a9342a9c062fd8f12e680202f9bf40e$9d0c18819f1f72561a0a083e36d73c09570fd1e25ae603db50d86e242e127cd8'
+      - testnet=1
+      - rpcallowip=127.0.0.1
+      - rpcbind=0.0.0.0
+      - rpcauth='plutus:0a9342a9c062fd8f12e680202f9bf40e$9d0c18819f1f72561a0a083e36d73c09570fd1e25ae603db50d86e242e127cd8'
     volumes:
       - bitcoind-data:/home/bitcoin/.bitcoin
     ports:
@@ -74,7 +73,7 @@ services:
         max-size: 10m
         max-file: "3"
 
-###############################################################
+  ###############################################################
 
   plutus:
     build:
@@ -98,9 +97,9 @@ services:
       - MONERO_WALLET_RPC_URL=http://monerod/
       - BITCOIN_WALLET_RPC_URL=http://bitcoind/
     restart: unless-stopped
-    
-###############################################################
-    
+
+  ###############################################################
+
   postgres:
     image: postgres
     volumes:
@@ -117,9 +116,9 @@ services:
       options:
         max-size: 10m
         max-file: "3"
-        
-###############################################################
-    
+
+  ###############################################################
+
   tor-node:
     build:
       context: ./tor
@@ -139,17 +138,15 @@ services:
       options:
         max-size: 10m
         max-file: "3"
-    
 
 ###############################################################
 
 volumes:
-    bitcoind-data:
-    monerod-data:
-    plutus-data:
-    database-data:
-    
+  bitcoind-data:
+  monerod-data:
+  plutus-data:
+  database-data:
+
 ###############################################################
-    
+
 configs:
-    

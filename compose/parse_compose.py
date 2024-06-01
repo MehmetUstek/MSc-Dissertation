@@ -40,13 +40,34 @@ from pprint import pprint
 # def create_ast(key, value):
 #     return ComposeNode(key, value)
 
+def preprocess_yaml(file_content):
+    # Replace {{variable}} with a placeholder token
+    processed_content = file_content.replace('{{-', '#').replace('{{', ' ').replace('}}', '').replace('****', '#').replace('****', '#').replace("{%-", "#").replace("{%", "#")
+    # processed_content = file_content.replace('****', '#').replace('****', '#')
+    return processed_content
+
+def postprocess_data(data):
+    # Reverse the replacement after parsing
+    if isinstance(data, dict):
+        return {k: postprocess_data(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [postprocess_data(element) for element in data]
+    elif isinstance(data, str):
+        return data.replace('__', '{{}}')
+    else:
+        return data
+
+
 def parse_yaml_to_ast(filename):
     with open(filename, 'r') as file:
+        file_content = file.read()
         # Load YAML content
-        yaml_content = yaml.safe_load(file)
+        processed_content = preprocess_yaml(file_content)
+        yaml_content = yaml.safe_load(processed_content)
         
         # Initialize AST
         ast = create_ast(yaml_content)
+        postprocess_data(yaml_content)
         
     return ast
 

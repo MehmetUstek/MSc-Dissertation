@@ -26,8 +26,6 @@ services:
       - elk
     depends_on:
       - elasticsearch
-  kibana:
-  rabbitmq:
 
 networks:
 

@@ -1,21 +1,21 @@
 services:
- dashboard:
-   image: helblingjoel/piserver:20230612
-   container_name: dashboard
-   ports:
-     - "80:3000"
-   restart: unless-stopped
-   environment:
-     DATABASE_URL: ""
-     OCTOPUS_ACCOUNT_NUMBER: ""
-     TZ: "Europe/London"
-     OCTOPUS_API_KEY: ""
-     OCTOPUS_ELECTRIC_MPAN: ""
-     OCTOPUS_ELECTRIC_SERIAL: ""
-     OCTOPUS_GAS_MPRN: ""
-     OCTOPUS_GAS_SERIAL: ""
-     MOVE_IN_DATE: ""
-     ADDRESS_CODE: ""
+  dashboard:
+    image: helblingjoel/piserver:20230612
+    container_name: dashboard
+    ports:
+      - "80:3000"
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ""
+      OCTOPUS_ACCOUNT_NUMBER: ""
+      TZ: "Europe/London"
+      OCTOPUS_API_KEY: ""
+      OCTOPUS_ELECTRIC_MPAN: ""
+      OCTOPUS_ELECTRIC_SERIAL: ""
+      OCTOPUS_GAS_MPRN: ""
+      OCTOPUS_GAS_SERIAL: ""
+      MOVE_IN_DATE: ""
+      ADDRESS_CODE: ""
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer

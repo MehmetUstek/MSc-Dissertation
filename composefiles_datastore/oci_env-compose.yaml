@@ -6,4 +6,4 @@ services:
     environment:
       - BASE_URL={PULP_FIXTURES_URL}
     ports:
-      - {PULP_FIXTURES_PORT}:{PULP_FIXTURES_PORT}
+      - "{PULP_FIXTURES_PORT}:{PULP_FIXTURES_PORT}"
