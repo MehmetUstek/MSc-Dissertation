@@ -14,7 +14,7 @@ import os
 def get_single_file_vulnerability(file_path, baseImageScan = False, isVerbose = True):
     if get_file_extension(file_path) == ".Dockerfile" or get_filename(file_path) == "Dockerfile" :
         return get_dockerfile_vulnerabilities(file_path, baseImageScan, isVerbose=isVerbose)
-    elif get_file_extension(file_path) == ".yaml":
+    elif get_file_extension(file_path) == ".yaml" or get_file_extension(file_path) == ".yml":
         return get_compose_file_vulnerabilities(file_path, isVerbose=isVerbose)
     else:
         return
@@ -49,7 +49,7 @@ def get_directory_file_vulnerability(directory_path, isAnalytics, directory_file
 
             for error_no in unique_errors:
                 fileunique_vulnerability_counts[error_no] += 1
-            counter += 1
+        counter += 1
 
     if isAnalytics:
         most_frequent_vulnerabilities_in_files(fileunique_vulnerability_counts, "Unique Error Numbers Across Files")

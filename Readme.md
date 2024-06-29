@@ -1,4 +1,4 @@
-# Vulnerability Detection Tool
+# Security Vulnerability Detection in IaC Configuration Files
 
 This tool is designed to identify vulnerabilities in Docker Compose files and Dockerfiles. It can analyze individual files or entire directories to detect potential security issues.
 

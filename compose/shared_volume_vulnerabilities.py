@@ -12,8 +12,6 @@ def check_shared_volume_antipattern(node,compose_error_descriptions):
                         volume_location = volume.get("source")
                         if volume_location in volumes:
                             matches.append({"errorNo":"4","severity":10, "customErrorMessage":f"Antipattern found in services: {volumes[volume_location]} and {service}."})
-
-                            # matches.append([f"Antipattern found in services: {volumes[volume]} and {service}. {compose_error_descriptions['4']}",10])
                         volumes[volume_location] = service
 
     return matches
