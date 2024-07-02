@@ -1,6 +1,8 @@
 from collections import Counter
 import matplotlib.pyplot as plt
 
+from utils import load_json
+
 
 def histogram_of_frequent_vulnerabilities(vulnerability_counts, title):
     # Data for the histogram
@@ -9,12 +11,18 @@ def histogram_of_frequent_vulnerabilities(vulnerability_counts, title):
 
     # Creating the histogram
     plt.figure(figsize=(10, 6))
-    plt.bar(error_numbers, counts, color='blue')
+    bars = plt.bar(error_numbers, counts, color='blue')
 
     plt.xlabel('Error Number')
     plt.ylabel('Number of Files with Error')
     plt.title(title)
     plt.xticks(error_numbers)  # Ensure each error number is labeled
+
+    error_descriptions = load_json('compose/antipattern_descriptions.json')
+    
+    for bar, (error_number, count) in zip(bars, vulnerability_counts.items()):
+        plt.text(bar.get_x() + bar.get_width()/2, 10, f'{error_descriptions[error_number]}', 
+            va='bottom', ha='center', color='white', rotation=90, fontsize=7)
 
     plt.show()
 

@@ -9,7 +9,7 @@
     },
 
     "errorNo": 7,
-    "severity": 5,
+    "severity": 3,
     "expectedValue": false,
     "level": 1
   },
@@ -51,7 +51,7 @@
       }
     },
     "errorNo": 10,
-    "severity": 5,
+    "severity": 3,
     "expectedValue": false,
     "level": 1
   },
@@ -65,7 +65,7 @@
       }
     },
     "errorNo": 5,
-    "severity": 9,
+    "severity": 8,
     "expectedValue": true,
     "level": 1
   },
@@ -93,7 +93,7 @@
       }
     },
     "errorNo": 12,
-    "severity": 10,
+    "severity": 6,
     "expectedValue": true,
     "level": 1
   },
@@ -107,7 +107,7 @@
       }
     },
     "errorNo": 16,
-    "severity": 10,
+    "severity": 3,
     "expectedValue": true,
     "level": 1
   }
