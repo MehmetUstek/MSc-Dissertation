@@ -1,8 +1,9 @@
 from collections import Counter, defaultdict
 from compose.compose_vulnerability_detection import get_compose_file_vulnerabilities
-from dockerfileVulnerability.dockerfile_vulnerability_detection import get_dockerfile_vulnerabilities
+from dockerfileVulnerability.dockerfile_vulnerability_detection import get_dockerfile_vulnerabilities, get_dockerfile_vulnerabilities_filecontent
 from analytics.analytics import most_frequent_vulnerabilities_in_files
-from compose.similarity_matching.vectoralscan import vectoral_scan
+# from compose.similarity_matching.vectoralscan import vectoral_scan
+from get_single_file_vulnerability import get_single_file_vulnerability_filepath
 from utils.file_extension import get_file_extension, get_filename
 import argparse
 import os
@@ -11,15 +12,6 @@ import os
 ## Run
 # Compose at local: python3 main.py -f compose.yaml
 # Dockerfile at local: python3 main.py -f Dockerfile
-
-def get_single_file_vulnerability(file_path, baseImageScan = False, isVerbose = True):
-    if get_file_extension(file_path) == ".Dockerfile" or get_filename(file_path) == "Dockerfile" :
-        return get_dockerfile_vulnerabilities(file_path, baseImageScan, isVerbose=isVerbose)
-    elif get_file_extension(file_path) == ".yaml" or get_file_extension(file_path) == ".yml":
-        # return vectoral_scan(file_path)
-        return get_compose_file_vulnerabilities(file_path, isVerbose=isVerbose)
-    else:
-        return
 
 
 def get_directory_file_vulnerability(directory_path, isAnalytics, directory_file_limit, isVerbose):
@@ -38,7 +30,7 @@ def get_directory_file_vulnerability(directory_path, isAnalytics, directory_file
             break
         file_absolute_path = os.path.join(directory_path, file)
         print(file_absolute_path)
-        vulnerabilities = get_single_file_vulnerability(file_absolute_path,isVerbose=isVerbose)
+        vulnerabilities = get_single_file_vulnerability_filepath(file_absolute_path,isVerbose=isVerbose)
         if vulnerabilities:
             # error_counts = Counter(error["errorNo"] for error in vulnerabilities)
             # print(error_counts)
@@ -66,8 +58,9 @@ def main():
     group.add_argument('-d', '--directory', type=str, help='Absolute directory path to process IaC configuration file', required=False)
     parser.add_argument('-bis', '--baseImageScan', type=bool, help='Base Image Scan, false by default', required=False, default=False)
     parser.add_argument('--analytics', type=bool, help='Analytics, false by default', required=False, default=False)
-    parser.add_argument('-vb','--ver', type=bool, help='ver', required=False, default=False)
+    parser.add_argument('-vb','--verbose', type=bool, help='verbose', required=False, default=False)
     parser.add_argument('-fL','--fileLimit', type=int, help='Directory File Limit', required=False, default=1000)
+    # parser.add_argument('-js','--returnJson', type=bool, help='Output format of the vulnerabilities', required=False, default=False)
     
     args = parser.parse_args()
     # print("args", args)
@@ -78,12 +71,12 @@ def main():
         directory_path = args.directory
         analytics = args.analytics
         directory_file_limit = args.fileLimit
-        verbose = args.ver
+        verbose = args.verbose
         get_directory_file_vulnerability(os.path.abspath(directory_path),analytics, directory_file_limit=directory_file_limit,isVerbose=verbose)
     elif args.file: 
         print(f"The provided file path is: {args.file}")
         file_path = args.file
-        get_single_file_vulnerability(os.path.abspath(file_path), args.baseImageScan)
+        get_single_file_vulnerability_filepath(os.path.abspath(file_path), args.baseImageScan)
     else:
         print("No file or directory specified.")
     

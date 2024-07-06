@@ -1,6 +1,6 @@
 def print_severity(logger, severity, vulnerability_detail):
     if isinstance(severity,int):
-        if severity == 10:
+        if severity >= 9:
             logger.critical(vulnerability_detail)
         elif severity >= 6:
             logger.error(vulnerability_detail)
