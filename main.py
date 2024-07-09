@@ -23,6 +23,7 @@ def get_directory_file_vulnerability(directory_path, isAnalytics, directory_file
     vulnerability_counts = defaultdict(int)
     severity_weighted_count = defaultdict(int)
     counter = 0
+    file_extension = get_file_extension(files[0])
 
     for file in files:
         print("fileNo:", counter)
@@ -45,9 +46,12 @@ def get_directory_file_vulnerability(directory_path, isAnalytics, directory_file
         counter += 1
 
     if isAnalytics:
-        most_frequent_vulnerabilities_in_files(fileunique_vulnerability_counts, "Unique Error Numbers Across Files")
-        most_frequent_vulnerabilities_in_files(vulnerability_counts, "Non-Unique Error Numbers Across Files")
-        most_frequent_vulnerabilities_in_files(severity_weighted_count, "Weighted Non-Unique Error Numbers Across Files")
+        most_frequent_vulnerabilities_in_files(fileunique_vulnerability_counts, "Unique Error Numbers Across Files", 
+                                            file_extension = file_extension)
+        most_frequent_vulnerabilities_in_files(vulnerability_counts, "Non-Unique Error Numbers Across Files",
+                                            file_extension = file_extension)
+        most_frequent_vulnerabilities_in_files(severity_weighted_count, "Weighted Non-Unique Error Numbers Across Files", 
+                                            file_extension = file_extension)
         
 
 
