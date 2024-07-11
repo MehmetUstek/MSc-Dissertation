@@ -1,0 +1,78 @@
+[
+  {
+    "tree": {
+      "provider": [
+        {
+          "aws": {
+            "region": "us-west-2"
+          }
+        }
+      ]
+    },
+    "errorNo": 1,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": {
+        "aws_api_gateway_domain_name": {
+          "resource_name": "bad_example",
+          "resource_configuration": {
+            "security_policy": "TLS_1_0"
+          }
+        }
+      }
+    },
+    "errorNo": 1,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_athena_workgroup": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "name": "example",
+              "configuration": {
+                "enforce_workgroup_configuration": false,
+                "publish_cloudwatch_metrics_enabled": true,
+                "result_configuration": {
+                  "output_location": "s3://${aws_s3_bucket.example.bucket}/output/",
+                  "encryption_configuration": {
+                    "encryption_option": "SSE_KMS",
+                    "kms_key_arn": "${aws_kms_key.example.arn}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "aws_athena_workgroup": {
+            "bad_example": {
+              "name": "example"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 1,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": {
+        "aws_launch_configuration": {
+          "bad_example": {
+            "root_block_device": {
+              "encrypted": false
+            }
+          }
+        }
+      }
+    },
+    "errorNo": 1,
+    "severity": 10
+  }
+]

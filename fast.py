@@ -1,8 +1,9 @@
 import base64
-from fastapi import FastAPI, HTTPException
-from get_single_file_vulnerability import get_single_file_vulnerability_filecontent
-from pydantic import BaseModel
 
+from fastapi import FastAPI, HTTPException
+from get_single_file_vulnerability import \
+    get_single_file_vulnerability_filecontent
+from pydantic import BaseModel
 from utils import load_json
 
 app = FastAPI()
