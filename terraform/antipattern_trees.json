@@ -14,65 +14,527 @@
   },
   {
     "tree": {
-      "resource": {
-        "aws_api_gateway_domain_name": {
-          "resource_name": "bad_example",
-          "resource_configuration": {
-            "security_policy": "TLS_1_0"
+      "resource": [
+        {
+          "aws_api_gateway_domain_name": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "security_policy": "not TLS_1_2"
+            }
           }
         }
-      }
+      ]
     },
-    "errorNo": 1,
+    "errorNo": 2,
     "severity": 10
   },
   {
     "tree": {
       "resource": [
         {
-          "aws_athena_workgroup": {
+          "aws_launch_configuration": {
             "resource_name": "bad_example",
             "resource_configuration": {
-              "name": "example",
-              "configuration": {
-                "enforce_workgroup_configuration": false,
-                "publish_cloudwatch_metrics_enabled": true,
-                "result_configuration": {
-                  "output_location": "s3://${aws_s3_bucket.example.bucket}/output/",
-                  "encryption_configuration": {
-                    "encryption_option": "SSE_KMS",
-                    "kms_key_arn": "${aws_kms_key.example.arn}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "aws_athena_workgroup": {
-            "bad_example": {
-              "name": "example"
+              "associate_public_ip_address": true
             }
           }
         }
       ]
     },
-    "errorNo": 1,
+    "errorNo": 3,
     "severity": 10
   },
   {
     "tree": {
-      "resource": {
-        "aws_launch_configuration": {
-          "bad_example": {
-            "root_block_device": {
+      "resource": [
+        {
+          "aws_launch_configuration": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "root_block_device": [
+                {
+                  "encrypted": false
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 4,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_cloudfront_distribution": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "default_cache_behavior": [
+                {
+                  "viewer_protocol_policy": "not redirect-to-https"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 5,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_cloudfront_distribution": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "viewer_certificate": [
+                {
+                  "minimum_protocol_version": "not TLSv1.2_2021"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 6,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_docdb_cluster": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "enabled_cloudwatch_logs_exports": "not audit"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 7,
+    "severity": 6
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_docdb_cluster": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "storage_encrypted": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 8,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_ebs_volume": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
               "encrypted": false
             }
           }
         }
-      }
+      ]
     },
-    "errorNo": 1,
+    "errorNo": 9,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_instance": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "root_block_device": {
+                "encrypted": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 10,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_instance": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "ebs_block_device": {
+                "encrypted": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 10,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_default_vpc": {
+            "resource_name": "bad_example"
+          }
+        }
+      ]
+    },
+    "errorNo": 11,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_network_acl_rule": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "protocol": "all"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 12,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_security_group": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "egress": {
+                "cidr_blocks": ["0.0.0.0/0"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 13,
     "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_network_acl_rule": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "cidr_block": "0.0.0.0/0"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 14,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_subnet": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "map_public_ip_on_launch": true
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 15,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_ecr_repository": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "image_scanning_configuration": [
+                {
+                  "scan_on_push": false
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 16,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_ecr_repository": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "image_tag_mutability": "MUTABLE"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 17,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_efs_file_system": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "encrypted": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 18,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_eks_cluster": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "name": "bad_example",
+              "vpc_config": [
+                {
+                  "endpoint_public_access": true,
+                  "public_access_cidrs": ["0.0.0.0/0"]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 19,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_elasticsearch_domain": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "encrypt_at_rest": [
+                {
+                  "enabled": false
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 20,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_elasticsearch_domain": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "domain_name": "domain-foo",
+              "node_to_node_encryption": [
+                {
+                  "enabled": false
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 21,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_elasticsearch_domain": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "domain_name": "domain-foo",
+              "domain_endpoint_options": [
+                {
+                  "enforce_https": false
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 22,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_elasticsearch_domain": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "domain_name": "bad_example",
+              "domain_endpoint_options": [
+                {
+                  "enforce_https": true,
+                  "tls_security_policy": "not Policy-Min-TLS-1-2-2019-07"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 23,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_elasticache_replication_group": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "at_rest_encryption_enabled": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 24,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_elasticache_replication_group": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "transit_encryption_enabled": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 25,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_alb": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "internal": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 26,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_alb": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "drop_invalid_header_fields": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 27,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_alb_listener": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "protocol": "HTTP"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 28,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_iam_access_key": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "user": "root"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 29,
+    "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_kms_key": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "enable_key_rotation": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 30,
+    "severity": 6
   }
 ]

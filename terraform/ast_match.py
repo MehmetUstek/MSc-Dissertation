@@ -9,9 +9,14 @@ def ast_match(small_ast, large_ast):
         # If found, use DFS to check for match
         if found_subtree:
             match_result = dfs_match(found_subtree, value)
-            print("Match found:" if match_result else "No match found.")
+            if match_result:
+            # print("Match found:" if match_result else "No match found.")
+                return True
+            else:
+                continue
         else:
             continue # Do something if needed.
+    return False
 
 
 # Load the full AST from the main Terraform configuration
