@@ -536,5 +536,206 @@
     },
     "errorNo": 30,
     "severity": 6
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_mq_broker": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "logs": [
+                        {
+                            "audit": false
+                        }
+                    ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 31,
+    "severity": 6
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_mq_broker": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "logs": [
+                        {
+                            "general": false
+                        }
+                    ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 32,
+    "severity": 2
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_mq_broker": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "publicly_accessible": true
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 33,
+    "severity": 2
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_msk_cluster": {
+                "resource_name": "bad_example",
+                "resource_configuration": {
+                    "encryption_info": [
+                        {
+                            "encryption_in_transit": [
+                                {
+                                    "client_broker": "TLS_PLAINTEXT"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+      ]
+    },
+    "errorNo": 34,
+    "severity": 9
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_neptune_cluster": {
+                "resource_name": "bad_example",
+                "resource_configuration": {
+                    "storage_encrypted": false
+                }
+            }
+        }
+      ]
+    },
+    "errorNo": 35,
+    "severity": 9
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_rds_cluster_instance": {
+                "resource_name": "bad_example",
+                "resource_configuration": {
+                    "performance_insights_enabled": false
+                }
+            }
+        }
+      ]
+    },
+    "errorNo": 37,
+    "severity": 9
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_db_security_group": {
+                "resource_name": "bad_example"
+            }
+        }
+      ]
+    },
+    "errorNo": 38,
+    "severity": 9
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_db_instance": {
+                "resource_name": "bad_example",
+                "resource_configuration": {
+                    "publicly_accessible": true
+                }
+            }
+        }
+      ]
+    },
+    "errorNo": 39,
+    "severity": 9
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_s3_bucket_public_access_block": {
+                "resource_name": "bad_example",
+                "resource_configuration": {
+                    "ignore_public_acls": false
+                }
+            }
+        }
+      ]
+    },
+    "errorNo": 40,
+    "severity": 9
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_s3_bucket": {
+                "resource_name": "bad_example",
+                "resource_configuration": {
+                    "acl": "public-read"
+                }
+            }
+        }
+      ]
+    },
+    "errorNo": 41,
+    "severity": 9
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_s3_bucket_public_access_block": {
+                "resource_name": "bad_example",
+                "resource_configuration": {
+                    "restrict_public_buckets": false
+                }
+            }
+        }
+      ]
+    },
+    "errorNo": 42,
+    "severity": 9
+  },
+  {
+    "tree": {
+     "data": [
+        {
+            "http": {
+            }
+        }
+    ]
+    },
+    "errorNo": 43,
+    "severity": 10
   }
 ]

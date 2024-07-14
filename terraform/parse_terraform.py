@@ -27,8 +27,11 @@ def parse_terraform(hcl_file_path):
     final_structure = {}
     
     # Handle providers
-    if 'provider' in hcl_dict:
-        final_structure['provider'] = hcl_dict['provider']
+    # if 'provider' in hcl_dict:
+    #     final_structure['provider'] = hcl_dict['provider']
+    for key in hcl_dict:
+        if key !="resource":
+            final_structure[key] = hcl_dict[key]
     
     # Transform resources
     if 'resource' in hcl_dict:
