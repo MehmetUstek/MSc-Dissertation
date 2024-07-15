@@ -20,6 +20,15 @@ def parse_terraform(hcl_file_path):
     with open(hcl_file_path, 'r') as file:
         hcl_content = file.read()
     
+    return helper_function(hcl_content)
+
+
+def parse_terraform_from_file_content(file_content):
+    return helper_function(file_content)
+
+    
+
+def helper_function(hcl_content):
     # Parse HCL content
     hcl_dict = hcl2.loads(hcl_content)
     

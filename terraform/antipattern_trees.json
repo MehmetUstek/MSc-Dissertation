@@ -225,7 +225,9 @@
             "resource_name": "bad_example",
             "resource_configuration": {
               "egress": {
-                "cidr_blocks": ["0.0.0.0/0"]
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ]
               }
             }
           }
@@ -330,7 +332,9 @@
               "vpc_config": [
                 {
                   "endpoint_public_access": true,
-                  "public_access_cidrs": ["0.0.0.0/0"]
+                  "public_access_cidrs": [
+                    "0.0.0.0/0"
+                  ]
                 }
               ]
             }
@@ -545,10 +549,10 @@
             "resource_name": "bad_example",
             "resource_configuration": {
               "logs": [
-                        {
-                            "audit": false
-                        }
-                    ]
+                {
+                  "audit": false
+                }
+              ]
             }
           }
         }
@@ -565,10 +569,10 @@
             "resource_name": "bad_example",
             "resource_configuration": {
               "logs": [
-                        {
-                            "general": false
-                        }
-                    ]
+                {
+                  "general": false
+                }
+              ]
             }
           }
         }
@@ -598,19 +602,19 @@
       "resource": [
         {
           "aws_msk_cluster": {
-                "resource_name": "bad_example",
-                "resource_configuration": {
-                    "encryption_info": [
-                        {
-                            "encryption_in_transit": [
-                                {
-                                    "client_broker": "TLS_PLAINTEXT"
-                                }
-                            ]
-                        }
-                    ]
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "encryption_info": [
+                {
+                  "encryption_in_transit": [
+                    {
+                      "client_broker": "TLS_PLAINTEXT"
+                    }
+                  ]
                 }
+              ]
             }
+          }
         }
       ]
     },
@@ -622,11 +626,11 @@
       "resource": [
         {
           "aws_neptune_cluster": {
-                "resource_name": "bad_example",
-                "resource_configuration": {
-                    "storage_encrypted": false
-                }
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "storage_encrypted": false
             }
+          }
         }
       ]
     },
@@ -638,11 +642,11 @@
       "resource": [
         {
           "aws_rds_cluster_instance": {
-                "resource_name": "bad_example",
-                "resource_configuration": {
-                    "performance_insights_enabled": false
-                }
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "performance_insights_enabled": false
             }
+          }
         }
       ]
     },
@@ -654,8 +658,8 @@
       "resource": [
         {
           "aws_db_security_group": {
-                "resource_name": "bad_example"
-            }
+            "resource_name": "bad_example"
+          }
         }
       ]
     },
@@ -667,11 +671,11 @@
       "resource": [
         {
           "aws_db_instance": {
-                "resource_name": "bad_example",
-                "resource_configuration": {
-                    "publicly_accessible": true
-                }
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "publicly_accessible": true
             }
+          }
         }
       ]
     },
@@ -683,11 +687,11 @@
       "resource": [
         {
           "aws_s3_bucket_public_access_block": {
-                "resource_name": "bad_example",
-                "resource_configuration": {
-                    "ignore_public_acls": false
-                }
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "ignore_public_acls": false
             }
+          }
         }
       ]
     },
@@ -699,11 +703,11 @@
       "resource": [
         {
           "aws_s3_bucket": {
-                "resource_name": "bad_example",
-                "resource_configuration": {
-                    "acl": "public-read"
-                }
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "acl": "public-read"
             }
+          }
         }
       ]
     },
@@ -715,11 +719,11 @@
       "resource": [
         {
           "aws_s3_bucket_public_access_block": {
-                "resource_name": "bad_example",
-                "resource_configuration": {
-                    "restrict_public_buckets": false
-                }
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "restrict_public_buckets": false
             }
+          }
         }
       ]
     },
@@ -728,14 +732,33 @@
   },
   {
     "tree": {
-     "data": [
+      "data": [
         {
-            "http": {
-            }
+          "http": {}
         }
-    ]
+      ]
     },
     "errorNo": 43,
     "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_codebuild_project": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "artifacts": [
+                {
+                  "encryption_disabled": true
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 58,
+    "severity": 9
   }
 ]

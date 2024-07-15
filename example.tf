@@ -326,3 +326,92 @@ data "http" "not_exfiltrating_data_honest" {
       value = "enabled"
     }
  }
+
+
+  resource "aws_athena_database" "good_example" {
+   name   = "database_name"
+   bucket = aws_s3_bucket.hoge.bucket
+
+   encryption_configuration {
+      encryption_option = "SSE_KMS"
+      kms_key_arn       = aws_kms_key.example.arn
+  }
+ }
+ resource "aws_athena_workgroup" "good_example" {
+   name = "example"
+
+   configuration {
+     enforce_workgroup_configuration    = true
+     publish_cloudwatch_metrics_enabled = true
+
+     result_configuration {
+       output_location = "s3://${aws_s3_bucket.example.bucket}/output/"
+
+       encryption_configuration {
+         encryption_option = "SSE_KMS"
+         kms_key_arn       = aws_kms_key.example.arn
+       }
+     }
+   }
+ }
+
+  resource "aws_launch_template" "good_example" {
+     image_id      = "ami-005e54dee72cc1d00"
+     instance_type = "t2.micro"
+     metadata_options {
+       http_tokens = "required"
+     }  
+ }
+
+ resource "aws_cloudfront_distribution" "bad_example" {
+    // other config
+    // no logging_config
+ }
+
+ resource "aws_cloudtrail" "bad_example" {
+   event_selector {
+     read_write_type           = "All"
+     include_management_events = true
+
+     data_resource {
+       type = "AWS::S3::Object"
+       values = ["${data.aws_s3_bucket.important-bucket.arn}/"]
+     }
+   }
+ }
+
+ resource "aws_cloudtrail" "bad_example" {
+   is_multi_region_trail = true
+
+   event_selector {
+     read_write_type           = "All"
+     include_management_events = true
+
+     data_resource {
+       type = "AWS::S3::Object"
+       values = ["${data.aws_s3_bucket.important-bucket.arn}/"]
+     }
+   }
+ }
+
+
+resource "aws_s3_bucket" "good_example" {
+    bucket = "abcdefgh"
+
+}
+
+ resource "aws_cloudwatch_log_group" "good_example" {
+    name = "good_example"
+
+    kms_key_id = aws_kms_key.log_key.arn
+ }
+
+ resource "aws_codebuild_project" "bad_example" {
+    // other config
+
+    artifacts {
+        // other artifacts config
+
+        encryption_disabled = true
+    }
+ }
