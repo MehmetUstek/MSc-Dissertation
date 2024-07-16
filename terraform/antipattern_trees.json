@@ -225,9 +225,7 @@
             "resource_name": "bad_example",
             "resource_configuration": {
               "egress": {
-                "cidr_blocks": [
-                  "0.0.0.0/0"
-                ]
+                "cidr_blocks": ["0.0.0.0/0"]
               }
             }
           }
@@ -332,9 +330,7 @@
               "vpc_config": [
                 {
                   "endpoint_public_access": true,
-                  "public_access_cidrs": [
-                    "0.0.0.0/0"
-                  ]
+                  "public_access_cidrs": ["0.0.0.0/0"]
                 }
               ]
             }
@@ -740,6 +736,59 @@
     },
     "errorNo": 43,
     "severity": 10
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_api_gateway_method_settings": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "settings": [
+                {
+                  "cache_data_encrypted": false
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 45,
+    "severity": 6
+  },
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_api_gateway_stage": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "xray_tracing_enabled": false
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 46,
+    "severity": 6
+  },
+
+  {
+    "tree": {
+      "resource": [
+        {
+          "aws_api_gateway_method": {
+            "resource_name": "bad_example",
+            "resource_configuration": {
+              "authorization": "NONE"
+            }
+          }
+        }
+      ]
+    },
+    "errorNo": 46,
+    "severity": 3
   },
   {
     "tree": {

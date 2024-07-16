@@ -6,15 +6,25 @@ def bfs_search(tree, key):
         current = queue.pop(0)
         if key in current:
             return current[key]  # Return the subtree when the key is found
-        for subkey, subval in current.items():
-            if isinstance(subval, dict):
-                queue.append(subval)
-            elif isinstance(subval, list):
-                queue.extend(subval)
+        if isinstance(current, dict):
+            for subkey, subval in current.items():
+                if isinstance(subval, dict):
+                    queue.append(subval)
+                elif isinstance(subval, list):
+                    queue.extend(subval)
+        elif isinstance(current, list):
+            print("aa")
+        else:
+            # We do not specify antipatterns as a single string.
+            continue
+
     return None
 
 def dfs_match(node1, node2):
     """ Recursively match two ASTs """
+    # node2 = small, node1= large ast
+    if node2 == "policy_more_than_one":
+        return node1 > 1
     if type(node1) != type(node2):
         return False
     if isinstance(node1, dict):
@@ -30,8 +40,14 @@ def dfs_match(node1, node2):
         return any(dfs_match(subnode, node2[0]) for subnode in node1 if isinstance(node2, list) and len(node2) == 1) or \
                all(dfs_match(n1, n2) for n1, n2 in zip(node1, node2))
     elif isinstance(node1, str):
-        if node2 == "bad_example":
+        if node2 == "bad_example" or node2== "placeholder":
             return True
+        elif node2 == "not empty":
+            return len(node1) > 0
+        elif node2 == "not zero":
+            return node1 > 0
+        elif node2 == "policy_more_than_one":
+            return node1 > 1
         elif "not" in node2:
             cleaned_string = node2.replace('not ', '')
             if node1 != cleaned_string:
