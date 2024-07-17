@@ -26,7 +26,7 @@ def is_compose_yaml_file(filename):
 def is_terraform(filename):
     return get_file_extension(filename) == ".tf"
 
-def check_if_file_from_valid_resource(filename):
+def get_file_type(filename):
     if is_dockerfile(filename):
         return Extension.Dockerfile
     elif is_compose_yaml_file(filename):

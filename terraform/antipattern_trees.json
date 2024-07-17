@@ -809,5 +809,61 @@
     },
     "errorNo": 58,
     "severity": 9
+  },
+  {
+    "tree": {
+      "kubernetes_network_policy": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "spec": [
+            {
+              "egress": [
+                {
+                  "to": [
+                    {
+                      "ip_block": [
+                        {
+                          "cidr": "0.0.0.0/0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "errorNo": 96,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "kubernetes_network_policy": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "spec": [
+            {
+              "ingress": [
+                {
+                  "from": [
+                    {
+                      "ip_block": [
+                        {
+                          "cidr": "0.0.0.0/0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "errorNo": 97,
+    "severity": 8
   }
 ]

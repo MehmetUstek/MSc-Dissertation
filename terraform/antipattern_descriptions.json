@@ -94,8 +94,8 @@
   "93": "aws_sns_enable-topic-encryption",
   "94": "aws_sqs_enable-queue-encryption",
   "95": "aws_workspaces_workspace_enable-disk-encryption",
-  "96": "",
-  "97": "",
+  "96": "kubernetes_no-public-egress",
+  "97": "kubernetes_no-public-ingress",
   "98": "",
   "99": ""
 }

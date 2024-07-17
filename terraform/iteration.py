@@ -4,7 +4,7 @@ def bfs_search(tree, key):
     queue = [tree]
     while queue:
         current = queue.pop(0)
-        if key in current:
+        if key in current and isinstance(current, dict):
             return current[key]  # Return the subtree when the key is found
         if isinstance(current, dict):
             for subkey, subval in current.items():

@@ -1,7 +1,7 @@
 from collections import Counter
 import matplotlib.pyplot as plt
 
-from utils import load_json
+from utils.load_json_based_on_extension_type import load_json_based_on_extension_type
 
 
 def histogram_of_frequent_vulnerabilities(vulnerability_counts, title,file_extension):
@@ -18,10 +18,7 @@ def histogram_of_frequent_vulnerabilities(vulnerability_counts, title,file_exten
     plt.title(title)
     plt.xticks(error_numbers)  # Ensure each error number is labeled
 
-    if file_extension == ".Dockerfile":
-        error_descriptions = load_json('dockerfileVulnerability/antipattern_descriptions.json')
-    elif file_extension == ".yaml" or file_extension == ".yml": ## TODO May change when terraform files are added.
-        error_descriptions = load_json('compose/antipattern_descriptions.json')
+    error_descriptions = load_json_based_on_extension_type(file_extension)
     
     for bar, (error_number, count) in zip(bars, vulnerability_counts.items()):
         plt.text(bar.get_x() + bar.get_width()/2, 10, f'{error_descriptions[error_number]}', 
