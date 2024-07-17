@@ -713,5 +713,39 @@
     },
     "errorNo": 92,
     "severity": 6
+  },
+  {
+    "tree": {
+      "aws_sns_topic": {
+        "resource_configuration": {
+          "kms_master_key_id": "not empty"
+        }
+      }
+    },
+    "errorNo": 93,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "aws_sqs_queue": {
+        "resource_configuration": {
+          "kms_master_key_id": "not empty"
+        }
+      }
+    },
+    "errorNo": 94,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "aws_workspaces_workspace": {
+        "resource_configuration": {
+          "root_volume_encryption_enabled": true,
+          "user_volume_encryption_enabled": true
+        }
+      }
+    },
+    "errorNo": 95,
+    "severity": 8
   }
 ]
