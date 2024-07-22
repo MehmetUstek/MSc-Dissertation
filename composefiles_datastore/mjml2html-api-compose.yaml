@@ -1,9 +1,0 @@
-services:
-  server:
-    container_name: mjml2html_api
-    build:
-      context: .
-    environment:
-      NODE_ENV: production
-    ports:
-      - 3000:3000

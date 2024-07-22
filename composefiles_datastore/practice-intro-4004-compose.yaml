@@ -1,6 +1,0 @@
-services:
-  app:
-    build: .
-    tty: true
-    volumes:
-      - .:/practice-intro-4004

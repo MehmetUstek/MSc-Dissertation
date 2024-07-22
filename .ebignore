@@ -165,3 +165,14 @@ cython_debug/
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 composefiles_datastore/
+
+# Additional
+analytics/
+crawler/
+compose.yml
+.Dockerfile
+.tf
+main.py
+.md
+output.json
+get_directory_vulnerability.py

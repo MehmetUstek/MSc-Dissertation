@@ -16,7 +16,6 @@
     #   Leaf: db-data
 
 import yaml
-from pprint import pprint
 
 # def parse_yaml_to_ast(filename):
 #     with open(filename, 'r') as file:
@@ -58,6 +57,38 @@ def postprocess_data(data):
         return data
 
 
+def parse_yaml_to_ast(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            file_content = file.read()
+        
+        return helper_function(file_content)
+    except Exception as e:
+        # Catch all other exceptions
+        print(f"An unexpected error occurred: {e}")
+
+
+def parse_yaml_to_ast_from_file_content(file_content):
+    try:
+        return helper_function(file_content)
+    except Exception as e:
+        # Catch all other exceptions
+        print(f"An unexpected error occurred: {e}")
+
+def helper_function(file_content):
+    try:
+        processed_content = preprocess_yaml(file_content)
+        yaml_content = yaml.safe_load(processed_content)
+        
+        # Initialize AST
+        ast = create_ast(yaml_content)
+        # postprocess_data(yaml_content)
+        return ast
+    except Exception as e:
+        # Catch all other exceptions
+        print(f"An unexpected error occurred: {e}")
+
+
 def parse_yaml_to_ast(filename):
     with open(filename, 'r') as file:
         file_content = file.read()
@@ -70,6 +101,8 @@ def parse_yaml_to_ast(filename):
         postprocess_data(yaml_content)
         
     return ast
+
+
 
 def create_ast(node):
     # If the node is a dictionary, iterate through its keys

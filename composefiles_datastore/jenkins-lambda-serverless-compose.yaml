@@ -1,6 +1,0 @@
-services:
-  authorizer:
-    path: functions/authorizer
-  handler:
-    path: functions/handler
-    dependsOn: authorizer

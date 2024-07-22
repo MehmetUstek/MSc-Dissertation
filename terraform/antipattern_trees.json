@@ -219,18 +219,15 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_security_group": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "egress": {
-                "cidr_blocks": ["0.0.0.0/0"]
-              }
+      "aws_security_group": {
+        "resource_configuration": {
+          "egress": [
+            {
+              "cidr_blocks": ["0.0.0.0/0"]
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 13,
     "severity": 10
@@ -836,7 +833,7 @@
       }
     },
     "errorNo": 96,
-    "severity": 8
+    "severity": 10
   },
   {
     "tree": {

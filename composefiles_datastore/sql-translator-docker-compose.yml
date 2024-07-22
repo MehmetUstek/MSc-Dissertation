@@ -1,9 +1,0 @@
-version: "3.8"
-services:
-  sql-translator:
-    container_name: sql-translator
-    build: .
-    env_file:
-      - .env.production
-    ports:
-      - "3000:3000"
