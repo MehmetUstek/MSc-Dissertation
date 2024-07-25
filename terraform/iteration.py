@@ -17,7 +17,6 @@ def bfs_search(tree, key):
         elif isinstance(current, list):
             if key in current:
                 return current[key]
-            print("aa")
         else:
             # We do not specify antipatterns as a single string.
             continue

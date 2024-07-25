@@ -27,7 +27,7 @@ def process_directory(directory_path):
         file_path = os.path.join(directory_path, filename)
         # Check if it's a file (not a directory)
         if os.path.isfile(file_path):
-            print(f"Processing file: {file_path}")
+            # print(f"Processing file: {file_path}")
             comment_sections_with_stars(file_path)
 
 
@@ -39,7 +39,8 @@ def file_contains_services(file_path):
                 if 'services' in line:
                     return True
     except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+        # print(f"Error reading {file_path}: {e}")
+        raise
     return False
 
 def check_files_in_directory(directory_path):
@@ -57,10 +58,10 @@ def check_files_in_directory(directory_path):
 
     # Output the results
     if files_without_services:
-        print("Files without 'version':")
+        # print("Files without 'version':")
         counter = 0
         for file in files_without_services:
-            print(file, counter)
+            # print(file, counter)
             counter += 1
     else:
         print("All files contain 'services'.")

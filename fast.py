@@ -59,8 +59,8 @@ async def vulnerability_scan(file: File):
     try:
         original_content = base64.b64decode(file.content.encode('utf-8')).decode('utf-8')
         if original_content:
-            print("Original Content:", original_content)
-            print("Filename:", file.name)
+            # print("Original Content:", original_content)
+            # print("Filename:", file.name)
             extension = get_file_type(filename=file.name)
             if extension:
                 try:
@@ -70,10 +70,10 @@ async def vulnerability_scan(file: File):
                     )
                     if json_data:
                         error_descriptions = load_json_based_on_extension_type(extension)
-                        print("Vulnerability Details:", json_data)
+                        # print("Vulnerability Details:", json_data)
 
                         for item in json_data:
-                            print("Vulnerability Item:", item)
+                            # print("Vulnerability Item:", item)
                             item["errorNo"] = error_descriptions[item["errorNo"]]
                         return json_data
                     else:
@@ -82,7 +82,7 @@ async def vulnerability_scan(file: File):
                         content={"message":"File contains no vulnerabilities."}
                         )
                 except RuntimeError as re:
-                    print(f"Error reading the file: {str(re)}")
+                    # print(f"Error reading the file: {str(re)}")
                     raise UnicornException(http_status=574, message="Syntax error in the file")
                 except Exception as e:
                     raise
@@ -92,7 +92,7 @@ async def vulnerability_scan(file: File):
         else:
             raise UnicornException(http_status=573, message="Empty file content, or inccorect base64 padding")
     except UnicornException as ue:
-        print(f"Error ({ue.http_status}): {ue.message}")
+        # print(f"Error ({ue.http_status}): {ue.message}")
         raise
 
 

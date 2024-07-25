@@ -24,7 +24,8 @@ def parse_terraform(hcl_file_path):
         return helper_function(hcl_content)
     except Exception as e:
         # Catch all other exceptions
-        print(f"An unexpected error occurred: {e}")
+        # print(f"An unexpected error occurred: {e}")
+        raise
 
 
 def parse_terraform_from_file_content(file_content):
@@ -32,7 +33,8 @@ def parse_terraform_from_file_content(file_content):
         return helper_function(file_content)
     except Exception as e:
         # Catch all other exceptions
-        print(f"An unexpected error occurred: {e}")
+        # print(f"An unexpected error occurred: {e}")
+        raise
 
     
 
@@ -56,12 +58,13 @@ def helper_function(hcl_content):
             final_structure['resource'] = transform_resources(hcl_dict['resource'])
         
         # Convert the parsed and transformed HCL to JSON
-        with open( 'output.json', 'w') as json_file:
-            json.dump(final_structure, json_file, indent=4)
+        # with open( 'output.json', 'w') as json_file:
+        #     json.dump(final_structure, json_file, indent=4)
         return final_structure
     except Exception as e:
         # Catch all other exceptions
-        print(f"An unexpected error occurred: {e}")
+        # print(f"An unexpected error occurred: {e}")
+        raise
 
 # Example usage
 # parse_terraform('example.tf')

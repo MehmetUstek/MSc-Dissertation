@@ -65,7 +65,8 @@ def parse_yaml_to_ast(file_path):
         return helper_function(file_content)
     except Exception as e:
         # Catch all other exceptions
-        print(f"An unexpected error occurred: {e}")
+        # print(f"An unexpected error occurred: {e}")
+        raise
 
 
 def parse_yaml_to_ast_from_file_content(file_content):
@@ -73,7 +74,8 @@ def parse_yaml_to_ast_from_file_content(file_content):
         return helper_function(file_content)
     except Exception as e:
         # Catch all other exceptions
-        print(f"An unexpected error occurred: {e}")
+        # print(f"An unexpected error occurred: {e}")
+        raise
 
 def helper_function(file_content):
     try:
@@ -86,7 +88,8 @@ def helper_function(file_content):
         return ast
     except Exception as e:
         # Catch all other exceptions
-        print(f"An unexpected error occurred: {e}")
+        # print(f"An unexpected error occurred: {e}")
+        raise
 
 
 def parse_yaml_to_ast(filename):
