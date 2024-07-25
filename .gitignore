@@ -160,8 +160,10 @@ cython_debug/
 #.idea/
 .vscode/launch.json
 .DS_Store
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
 composefiles_datastore/
+
+
+
+.env.*
+*.Dockerfile
+*.tf

@@ -4,15 +4,19 @@ def bfs_search(tree, key):
     queue = [tree]
     while queue:
         current = queue.pop(0)
-        if key in current and isinstance(current, dict):
-            return current[key]  # Return the subtree when the key is found
+        # if key in current and isinstance(current, dict):
+        #     return current[key]  # Return the subtree when the key is found
         if isinstance(current, dict):
+            if key in current:
+                return current[key]
             for subkey, subval in current.items():
                 if isinstance(subval, dict):
                     queue.append(subval)
                 elif isinstance(subval, list):
                     queue.extend(subval)
         elif isinstance(current, list):
+            if key in current:
+                return current[key]
             print("aa")
         else:
             # We do not specify antipatterns as a single string.

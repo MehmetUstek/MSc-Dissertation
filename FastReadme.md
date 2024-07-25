@@ -1,3 +1,3 @@
 # Run Instruction
 
-uvicorn fast:app --reload
+uvicorn fast:app --reload --env-file .env.development

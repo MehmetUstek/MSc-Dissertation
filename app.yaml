@@ -1,2 +1,4 @@
 runtime: python311
-entrypoint: gunicorn -w 1 -k uvicorn.workers.UvicornWorker fast:app
+entrypoint: gunicorn -w 4 -k uvicorn.workers.UvicornWorker --env DEBUG=False --env ENVIRONMENT=production fast:app
+automatic_scaling:
+  max_instances: 3

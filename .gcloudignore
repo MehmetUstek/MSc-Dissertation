@@ -160,19 +160,14 @@ cython_debug/
 #.idea/
 .vscode/launch.json
 .DS_Store
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
-composefiles_datastore/
 
 # Additional
 analytics/
 crawler/
+research/
 compose.yml
-.Dockerfile
-.tf
-main.py
-.md
-output.json
-get_directory_vulnerability.py
+*.Dockerfile
+*.tf
+*.md
+.env.development
+.env.production

@@ -11,20 +11,31 @@ load_dotenv()
 def get_github_token():
     return os.getenv('GITHUB_TOKEN')
 
-def search_github(token, query, start_page=1, items_per_page=30):
+
+def search_github(token, extension, exclude_names, start_page=1, items_per_page=30):
     url = "https://api.github.com/search/code"
     headers = {'Authorization': f'token {token}'}
+    
+    # Build the query to include the extension and exclude specific filenames
+    query = f"extension:{extension}"
+    include_names = ["aws"]
+    for name in include_names:
+        query += f" filename:{name}"
+    for name in exclude_names:
+        query += f" -filename:{name}"
+        
     params = {
         'q': query + " in:path",
         'per_page': items_per_page,
         'page': start_page
     }
+    
     response = requests.get(url, headers=headers, params=params)
     data = response.json()
-    # print("data",data)
     return data['items'], response.headers
 
-def download_files(items, directory="downloaded_compose_files", last_index_file="last_index.txt"):
+
+def download_files(items, directory="downloaded_aws_terraform_files", last_index_file="last_index.txt"):
     if not os.path.exists(directory):
         os.makedirs(directory)
     
@@ -37,21 +48,23 @@ def download_files(items, directory="downloaded_compose_files", last_index_file=
         file_url = item['html_url'].replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/')
         file_name = f"{item['repository']['name']}-{item['name']}"
         file_path = os.path.join(directory, file_name)
-
-        # Filter out unwanted files based on naming conventions
-        if any(unwanted in file_name.lower() for unwanted in ["example", "template", "_in.md", ".js"]):
-            print(f"Skipping unwanted file: {file_name}")
-            continue
-
-        response = requests.get(file_url)
-        if response.status_code == 200:
-            with open(file_path, 'w') as file:
-                file.write(response.text)
-            print(f"Downloaded {file_path}")
-            with open(last_index_file, 'w') as f:
-                f.write(str(index))
+        if  os.path.exists(file_path):
+            print("File exists")
         else:
-            print(f"Failed to download {file_url}")
+            # Filter out unwanted files based on naming conventions
+            if any(unwanted in file_name.lower() for unwanted in ["example", "template", "_in.md", ".js"]):
+                print(f"Skipping unwanted file: {file_name}")
+                continue
+
+            response = requests.get(file_url)
+            if response.status_code == 200:
+                with open(file_path, 'w') as file:
+                    file.write(response.text)
+                print(f"Downloaded {file_path}")
+                with open(last_index_file, 'w') as f:
+                    f.write(str(index))
+            else:
+                print(f"Failed to download {file_url}")
 
 if __name__ == '__main__':
     # Your GitHub token
@@ -74,13 +87,17 @@ if __name__ == '__main__':
 
     # Compose file search queries
     # compose_files = ['filename:docker-compose.yml', 'filename:docker-compose.yaml', 'filename:compose.yml', 'filename:compose.yaml']
-    file_query = 'filename:compose.yaml'
+    # file_query = 'filename:.tf'
     all_items = []
+
+    extension = '.tf'
+    exclude_names = ['output', 'variables', 'example', 'template', 'versions','auto','provider']
+
 
     # for file_query in compose_files:
     keep_searching = True
     while keep_searching:
-        items, headers = search_github(github_token, file_query, start_page=start_page, items_per_page=items_per_page)
+        items, headers = search_github(github_token, extension, exclude_names, start_page=start_page, items_per_page=items_per_page)
         download_files(items)
         if 'next' in headers.get('Link', ''):
             start_page += 1

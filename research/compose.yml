@@ -1,0 +1,57 @@
+version: "3.8"
+services:
+  account_service:
+    image: postgres:latest
+    ports:
+      - "0.0.0.0:3080:8000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+    networks:
+      - backend_network
+    privileged: true
+
+  analytics_service:
+    image: redis:latest
+    ports:
+      - "0.0.0.0:3000:3000"
+    networks:
+      - backend_network
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: any
+    volumes: { "type": "bind" }
+
+  authentication_service:
+    image: dropdatabase233/authentication_service
+    build: ./authentication_service
+    ports:
+      - "0.0.0.0:3001:3000"
+    networks:
+      - backend_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+    volumes:
+      - /:/app/data
+
+  authorization_service:
+    image: dropdatabase233/authorization_service
+    build: ./authorization_service
+    ports:
+      - "0.0.0.0:3002:3000"
+    networks:
+      - backend_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+  volumes:
+    - /:/app/data
+
+networks:
+  backend_network:
+    driver: overlay
