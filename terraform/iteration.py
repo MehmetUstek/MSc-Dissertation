@@ -59,6 +59,3 @@ def dfs_match(node1, node2):
     else:
         return node1 == node2
 
-
-
-

@@ -1,431 +1,335 @@
 [
   {
     "tree": {
-      "resource": [
-        {
-          "aws_ecs_cluster": {
-            "resource_name": "good_example",
-            "resource_configuration": {
+      "aws_ecs_cluster": {
+        "resource_name": "good_example",
+        "resource_configuration": {
+          "name": "placeholder",
+          "setting": [
+            {
               "name": "placeholder",
-              "setting": [
-                {
-                  "name": "placeholder",
-                  "value": "enabled"
-                }
-              ]
+              "value": "enabled"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 44,
     "severity": 2
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_athena_database": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "encryption_configuration": [
-                {
-                  "encryption_option": "SSE_KMS"
-                }
-              ]
+      "aws_athena_database": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "encryption_configuration": [
+            {
+              "encryption_option": "SSE_KMS"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 49,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_athena_workgroup": {
-            "resource_configuration": {
-              "configuration": [
+      "aws_athena_workgroup": {
+        "resource_configuration": {
+          "configuration": [
+            {
+              "result_configuration": [
                 {
-                  "result_configuration": [
+                  "encryption_configuration": [
                     {
-                      "encryption_configuration": [
-                        {
-                          "encryption_option": "SSE_KMS"
-                        }
-                      ]
+                      "encryption_option": "SSE_KMS"
                     }
                   ]
                 }
               ]
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 49,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_launch_template": {
-            "resource_configuration": {
-              "metadata_options": [
-                {
-                  "http_tokens": "required"
-                }
-              ]
+      "aws_launch_template": {
+        "resource_configuration": {
+          "metadata_options": [
+            {
+              "http_tokens": "required"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 50,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudfront_distribution": {
-            "resource_configuration": {
-              "logging_config": [{}]
-            }
-          }
+      "aws_cloudfront_distribution": {
+        "resource_configuration": {
+          "logging_config": [{}]
         }
-      ]
+      }
     },
     "errorNo": 51,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudtrail": {
-            "resource_configuration": {
-              "is_multi_region_trail": true
-            }
-          }
+      "aws_cloudtrail": {
+        "resource_configuration": {
+          "is_multi_region_trail": true
         }
-      ]
+      }
     },
     "errorNo": 52,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudtrail": {
-            "resource_configuration": {
-              "kms_key_id": "placeholder"
-            }
-          }
+      "aws_cloudtrail": {
+        "resource_configuration": {
+          "kms_key_id": "placeholder"
         }
-      ]
+      }
     },
     "errorNo": 53,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudtrail": {
-            "resource_configuration": {
-              "enable_log_file_validation": true
-            }
-          }
+      "aws_cloudtrail": {
+        "resource_configuration": {
+          "enable_log_file_validation": true
         }
-      ]
+      }
     },
     "errorNo": 54,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudtrail": {
-            "resource_configuration": {
-              "cloud_watch_logs_group_arn": "placeholder"
-            }
-          }
+      "aws_cloudtrail": {
+        "resource_configuration": {
+          "cloud_watch_logs_group_arn": "placeholder"
         }
-      ]
+      }
     },
     "errorNo": 55,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_s3_bucket": {
-            "resource_configuration": {
-              "logging": []
-            }
-          }
+      "aws_s3_bucket": {
+        "resource_configuration": {
+          "logging": []
         }
-      ]
+      }
     },
     "errorNo": 56,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudwatch_log_group": {
-            "resource_configuration": {
-              "kms_key_id": "placeholder"
-            }
-          }
+      "aws_cloudwatch_log_group": {
+        "resource_configuration": {
+          "kms_key_id": "placeholder"
         }
-      ]
+      }
     },
     "errorNo": 57,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_config_configuration_aggregator": {
-            "resource_configuration": {
-              "account_aggregation_source": [
-                {
-                  "all_regions": true
-                }
-              ]
+      "aws_config_configuration_aggregator": {
+        "resource_configuration": {
+          "account_aggregation_source": [
+            {
+              "all_regions": true
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 59,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_docdb_cluster": {
-            "resource_configuration": {
-              "kms_key_id": "placeholder"
-            }
-          }
+      "aws_docdb_cluster": {
+        "resource_configuration": {
+          "kms_key_id": "placeholder"
         }
-      ]
+      }
     },
     "errorNo": 60,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_dynamodb_table": {
-            "resource_configuration": {
-              "point_in_time_recovery": [
-                {
-                  "enabled": true
-                }
-              ]
+      "aws_dynamodb_table": {
+        "resource_configuration": {
+          "point_in_time_recovery": [
+            {
+              "enabled": true
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 61,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_dynamodb_table": {
-            "resource_name": "good_example",
-            "resource_configuration": {
-              "server_side_encryption": [
-                {
-                  "enabled": true,
-                  "kms_key_arn": "placeholder"
-                }
-              ]
+      "aws_dynamodb_table": {
+        "resource_name": "good_example",
+        "resource_configuration": {
+          "server_side_encryption": [
+            {
+              "enabled": true,
+              "kms_key_arn": "placeholder"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 62,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_ebs_volume": {
-            "resource_configuration": {
-              "kms_key_id": "placeholder"
-            }
-          }
+      "aws_ebs_volume": {
+        "resource_configuration": {
+          "kms_key_id": "placeholder"
         }
-      ]
+      }
     },
     "errorNo": 63,
     "severity": 2
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_security_group": {
-            "resource_configuration": {
-              "description": "Allow inbound HTTP traffic"
-            }
-          }
+      "aws_security_group": {
+        "resource_configuration": {
+          "description": "placeholder"
         }
-      ]
+      }
     },
     "errorNo": 64,
     "severity": 1
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_security_group": {
-            "resource_configuration": {
-              "ingress": [
-                {
-                  "description": "placeholder"
-                }
-              ]
+      "aws_security_group": {
+        "resource_configuration": {
+          "ingress": [
+            {
+              "description": "placeholder"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 65,
     "severity": 1
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_instance": {
-            "resource_configuration": {
-              "metadata_options": [
-                {
-                  "http_tokens": "required"
-                }
-              ]
+      "aws_instance": {
+        "resource_configuration": {
+          "metadata_options": [
+            {
+              "http_tokens": "required"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 66,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_launch_template": {
-            "resource_configuration": {
-              "metadata_options": [
-                {
-                  "http_tokens": "required"
-                }
-              ]
+      "aws_launch_template": {
+        "resource_configuration": {
+          "metadata_options": [
+            {
+              "http_tokens": "required"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 67,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_ebs_volume": {
-            "resource_configuration": {
-              "kms_key_id": "placeholder"
-            }
-          }
+      "aws_ebs_volume": {
+        "resource_configuration": {
+          "kms_key_id": "placeholder"
         }
-      ]
+      }
     },
     "errorNo": 68,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_ecr_repository": {
-            "resource_configuration": {
-              "encryption_configuration": [
-                {
-                  "encryption_type": "KMS",
-                  "kms_key": "placeholder"
-                }
-              ]
+      "aws_ecr_repository": {
+        "resource_configuration": {
+          "encryption_configuration": [
+            {
+              "encryption_type": "KMS",
+              "kms_key": "placeholder"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 69,
     "severity": 2
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_ecs_cluster": {
-            "resource_configuration": {
+      "aws_ecs_cluster": {
+        "resource_configuration": {
+          "name": "placeholder",
+          "setting": [
+            {
               "name": "placeholder",
-              "setting": [
-                {
-                  "name": "placeholder",
-                  "value": "enabled"
-                }
-              ]
+              "value": "enabled"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 70,
     "severity": 2
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_elasticsearch_domain": {
-            "resource_configuration": {
-              "log_publishing_options": [
-                {
-                  "cloudwatch_log_group_arn": "placeholder",
-                  "log_type": "AUDIT_LOGS",
-                  "enabled": true
-                }
-              ]
+      "aws_elasticsearch_domain": {
+        "resource_configuration": {
+          "log_publishing_options": [
+            {
+              "cloudwatch_log_group_arn": "placeholder",
+              "log_type": "AUDIT_LOGS",
+              "enabled": true
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 71,
     "severity": 6

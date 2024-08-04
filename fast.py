@@ -3,12 +3,15 @@ import os
 
 from fastapi import FastAPI, HTTPException, Request, logger
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from utils.extension_enum import Extension
 from single_file_vulnerability_scan.get_single_file_vulnerability import \
     get_single_file_vulnerability_filecontent
-from pydantic import BaseModel
 from utils.check_file_extensions import get_file_type
-from utils.load_json_based_on_extension_type import \
-    load_json_based_on_extension_type
+from utils.load_json_based_on_extension_type import (
+    load_consequences_based_on_extension_type,
+    load_explanations_based_on_extension_type,
+    load_json_based_on_extension_type)
 
 # Now you can access the variables from the file as environment variables
 debug = os.getenv('DEBUG', 'False') == "True"
@@ -71,10 +74,18 @@ async def vulnerability_scan(file: File):
                     if json_data:
                         error_descriptions = load_json_based_on_extension_type(extension)
                         # print("Vulnerability Details:", json_data)
+                        
+                            
 
                         for item in json_data:
                             # print("Vulnerability Item:", item)
+                            if extension == Extension.Terraform: ## TODO: Get rid of this when you also implement other extension types.
+                                explanations = load_explanations_based_on_extension_type(extension)
+                                consequences = load_consequences_based_on_extension_type(extension)
+                                item["description"] = explanations[item["errorNo"]]
+                                item["consequence"] = consequences[item["errorNo"]]
                             item["errorNo"] = error_descriptions[item["errorNo"]]
+                            
                         return json_data
                     else:
                         return JSONResponse(
@@ -85,7 +96,7 @@ async def vulnerability_scan(file: File):
                     # print(f"Error reading the file: {str(re)}")
                     raise UnicornException(http_status=574, message="Syntax error in the file")
                 except Exception as e:
-                    raise
+                    raise UnicornException(http_status=574, message="Syntax error in the file")
                 
             else:
                 raise UnicornException(http_status=571, message="Unknown file extension.")

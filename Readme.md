@@ -22,14 +22,28 @@ You can analyze a specific file by providing its path. Use the following command
 - **For Dockerfiles**:
   ```bash
   python3 main.py -f /path/to/Dockerfile
+  python -m research.main -f /path/to/Dockerfile
   ```
 - **For Docker Compose files**:
 
   ```bash
   python3 main.py -f /path/to/compose.yaml
+  python -m research.main -f /path/to/compose.yaml
+  ```
+
+  - **For Terraform files**:
+
+  ```bash
+  python3 main.py -f /path/to/terraform.tf
+  python -m research.main -f /path/to/terraform.tf
   ```
 
 - **For Entire directory scans**:
   ```bash
   python3 main.py -d /path/to/directory
+  python -m research.main -d /path/to/directory
   ```
+
+# References
+
+This study benefited from TFSec (https://aquasecurity.github.io/tfsec/v1.28.1/checks/), and registry hashicorp terraform documentation (https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/) for research on terraform vulnerabilities, explanations, possible impacts and consequences.

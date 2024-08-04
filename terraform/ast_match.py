@@ -21,6 +21,23 @@ def ast_match(small_ast, large_ast):
 def missing_configuration_ast_match(small_ast, large_ast):
     for key, value in small_ast.items():
         # Perform BFS to find the top-level small_ast in the large AST
+        # if key == "resource" and isinstance(value, list): # Special case for vulnerabilities that use resource at the top level like 102.
+        #     # I defined everything to start below resource the level.
+        #     # key = value[0] # This configuration is an example of vulnerability 102.
+        #     for lst_item in value:
+        #         for lst_key, lst_value in lst_item.items():
+        #             print(lst_key, lst_value)
+        #             if lst_key == "policy":
+        #                 print("asd")
+        #             found_subtree = bfs_search(large_ast, key)
+        #             if found_subtree:
+        #                 break
+        #         if found_subtree:
+        #             break
+                    
+        # else: # General case
+        #     found_subtree = bfs_search(large_ast, key)
+
         found_subtree = bfs_search(large_ast, key)
 
         # If found, use DFS to check for missing conf.

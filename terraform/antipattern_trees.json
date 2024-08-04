@@ -1,13 +1,12 @@
 [
   {
     "tree": {
-      "provider": [
-        {
-          "aws": {
-            "region": "us-west-2"
-          }
+      "opc_compute_ip_address_reservation": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "ip_address_pool": "public-ippool"
         }
-      ]
+      }
     },
     "errorNo": 1,
     "severity": 10
@@ -504,16 +503,11 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_iam_access_key": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "user": "root"
-            }
-          }
+      "aws_iam_access_key": {
+        "resource_configuration": {
+          "user": "root"
         }
-      ]
+      }
     },
     "errorNo": 29,
     "severity": 10
@@ -862,5 +856,49 @@
     },
     "errorNo": 97,
     "severity": 8
+  },
+  {
+    "tree": {
+      "github_actions_environment_secret": {
+        "resource_configuration": {
+          "plaintext_value": "not empty"
+        }
+      }
+    },
+    "errorNo": 98,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "github_branch_protection": {
+        "resource_configuration": {
+          "require_signed_commits": "false"
+        }
+      }
+    },
+    "errorNo": 99,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "github_repository": {
+        "resource_configuration": {
+          "vulnerability_alerts": "false"
+        }
+      }
+    },
+    "errorNo": 100,
+    "severity": 8
+  },
+  {
+    "tree": {
+      "github_repository": {
+        "resource_configuration": {
+          "visibility": "public"
+        }
+      }
+    },
+    "errorNo": 101,
+    "severity": 10
   }
 ]
