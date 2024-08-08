@@ -29,16 +29,12 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_launch_configuration": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "associate_public_ip_address": true
-            }
-          }
+      "aws_launch_configuration": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "associate_public_ip_address": true
         }
-      ]
+      }
     },
     "errorNo": 3,
     "severity": 10
@@ -65,124 +61,97 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudfront_distribution": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "default_cache_behavior": [
-                {
-                  "viewer_protocol_policy": "not redirect-to-https"
-                }
-              ]
+      "aws_cloudfront_distribution": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "default_cache_behavior": [
+            {
+              "viewer_protocol_policy": "allow-all"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 5,
     "severity": 10
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_cloudfront_distribution": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "viewer_certificate": [
-                {
-                  "minimum_protocol_version": "not TLSv1.2_2021"
-                }
-              ]
+      "aws_cloudfront_distribution": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "viewer_certificate": [
+            {
+              "minimum_protocol_version": "not TLSv1.2_2021"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 6,
     "severity": 10
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_docdb_cluster": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "enabled_cloudwatch_logs_exports": "not audit"
-            }
-          }
+      "aws_docdb_cluster": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "enabled_cloudwatch_logs_exports": "not audit"
         }
-      ]
+      }
     },
     "errorNo": 7,
     "severity": 6
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_docdb_cluster": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "storage_encrypted": false
-            }
-          }
+      "aws_docdb_cluster": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "storage_encrypted": false
         }
-      ]
+      }
     },
     "errorNo": 8,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_ebs_volume": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "encrypted": false
-            }
-          }
+      "aws_ebs_volume": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "encrypted": false
         }
-      ]
+      }
     },
     "errorNo": 9,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_instance": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "root_block_device": {
-                "encrypted": false
-              }
-            }
+      "aws_instance": {
+        "resource_configuration": {
+          "root_block_device": {
+            "encrypted": false
           }
         }
-      ]
+      }
     },
     "errorNo": 10,
     "severity": 8
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_instance": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "ebs_block_device": {
-                "encrypted": false
-              }
+      "aws_instance": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "ebs_block_device": [
+            {
+              "encrypted": false
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 10,
     "severity": 8
@@ -261,7 +230,7 @@
       ]
     },
     "errorNo": 15,
-    "severity": 10
+    "severity": 8
   },
   {
     "tree": {
@@ -281,7 +250,7 @@
       ]
     },
     "errorNo": 16,
-    "severity": 10
+    "severity": 8
   },
   {
     "tree": {
@@ -297,7 +266,7 @@
       ]
     },
     "errorNo": 17,
-    "severity": 10
+    "severity": 8
   },
   {
     "tree": {
@@ -514,38 +483,14 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_kms_key": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "enable_key_rotation": false
-            }
-          }
+      "aws_kms_key": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "enable_key_rotation": false
         }
-      ]
+      }
     },
     "errorNo": 30,
-    "severity": 6
-  },
-  {
-    "tree": {
-      "resource": [
-        {
-          "aws_mq_broker": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "logs": [
-                {
-                  "audit": false
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "errorNo": 31,
     "severity": 6
   },
   {
@@ -638,7 +583,7 @@
       ]
     },
     "errorNo": 37,
-    "severity": 9
+    "severity": 3
   },
   {
     "tree": {
@@ -730,20 +675,16 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_api_gateway_method_settings": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "settings": [
-                {
-                  "cache_data_encrypted": false
-                }
-              ]
+      "aws_api_gateway_method_settings": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "settings": [
+            {
+              "cache_data_encrypted": false
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 45,
     "severity": 6

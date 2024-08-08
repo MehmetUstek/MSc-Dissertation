@@ -167,3 +167,4 @@ composefiles_datastore/
 .env.*
 *.Dockerfile
 *.tf
+output.json
