@@ -49,8 +49,22 @@ You can analyze a specific file by providing its path. Use the following command
   ```
 
 - **For Entire directory scans**:
-  ```bash
+
+  ````bash
   python -m research.main -d /path/to/directory
+  ```
+  </br>
+  ````
+
+- **A Base Image Scan**
+
+  ```bash
+  python -m research.main -bis -f /path/to/file -vb
+  ```
+
+- **A typical directory scan with analytics for Base Image Scan**
+  ```bash
+  python -m research.main -bis -d /path/to/directory -fL 5 -vb --analytics
   ```
 
 # References

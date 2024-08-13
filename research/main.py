@@ -11,7 +11,7 @@ from single_file_vulnerability_scan.get_single_file_vulnerability import \
 
 def main():
     parser = argparse.ArgumentParser(description="AST-matching IaC configuration file vulnerability scanner", add_help=True)
-    parser.add_argument('-bis', '--baseImageScan', type=bool, help='Base Image Scan, false by default', required=False, default=False)
+    parser.add_argument('-bis', '--baseImageScan', action='store_true', help='Base Image Scan, false by default', required=False, default=False)
     parser.add_argument('--analytics', action='store_true', help='Analytics, false by default', required=False, default=False)
     parser.add_argument('-vb','--verbose', action='store_true', help='verbose', required=False, default=False)
     parser.add_argument('-fL','--fileLimit', type=int, help='Directory File Limit', required=False, default=1000)
@@ -35,12 +35,16 @@ def main():
             analytics = args.analytics
             directory_file_limit = args.fileLimit
             verbose = args.verbose
-            get_directory_file_vulnerability(os.path.abspath(directory_path),analytics, directory_file_limit=directory_file_limit,isVerbose=verbose)
+            get_directory_file_vulnerability(os.path.abspath(directory_path),analytics, directory_file_limit=directory_file_limit,isVerbose=verbose,  baseImageScan=args.baseImageScan)
         elif args.file:
             print(f"The provided file path is: {args.file}")
             file_path = args.file
             debug = args.debug
-            vulnerabilities = get_single_file_vulnerability_filepath(os.path.abspath(file_path), baseImageScan=args.baseImageScan, debug= debug)
+            if args.baseImageScan:
+                base_image_cached_vulnerabilities ={}
+                vulnerabilities = get_single_file_vulnerability_filepath(os.path.abspath(file_path), baseImageScan=args.baseImageScan, debug= debug, base_image_cached_vulnerabilities=base_image_cached_vulnerabilities)
+            else:
+                vulnerabilities = get_single_file_vulnerability_filepath(os.path.abspath(file_path), baseImageScan=args.baseImageScan, debug= debug)
             if vulnerabilities and args.vulnerabilityList:
                 # print(vulnerabilities)
                 all_errorNos = [int(entry['errorNo']) for entry in vulnerabilities]

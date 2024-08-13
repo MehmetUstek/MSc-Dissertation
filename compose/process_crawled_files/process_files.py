@@ -71,4 +71,4 @@ def check_files_in_directory(directory_path):
 
 
 
-process_directory('../../composefiles_datastore/')
+# process_directory('../../composefiles_datastore/')
