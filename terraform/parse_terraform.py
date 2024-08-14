@@ -58,8 +58,8 @@ def helper_function(hcl_content, debug = False):
         # Convert the parsed and transformed HCL to JSON
         if debug:
             import json
-            with open( 'output.json', 'w') as json_file:
-                json.dump(final_structure, json_file, indent=4)
+            # with open( 'output.json', 'w') as json_file:
+            #     json.dump(final_structure, json_file, indent=4)
         return final_structure
     except Exception as e:
         # Catch all other exceptions

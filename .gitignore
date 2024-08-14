@@ -168,3 +168,5 @@ composefiles_datastore/
 *.Dockerfile
 *.tf
 output.json
+.gcloudignore
+!vulnerable_script.tf

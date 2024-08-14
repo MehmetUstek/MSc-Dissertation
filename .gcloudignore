@@ -171,3 +171,6 @@ compose.yml
 *.md
 .env.development
 .env.production
+.git/
+.gitignore
+compose/process_crawled_files/
