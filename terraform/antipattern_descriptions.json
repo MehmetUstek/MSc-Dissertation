@@ -83,7 +83,7 @@
   "82": "aws_mq_enable-general-logging",
   "83": "aws_rds_enable-performance-insights-encryption",
   "84": "aws_rds_encrypt-cluster-storage-data",
-  "85": "encrypt-instance-storage-data",
+  "85": "rds_encrypt-instance-storage-data",
   "86": "aws_redshift_encryption-customer-key",
   "87": "aws_redshift_use-vpc",
   "88": "aws_s3_block-public-acls",

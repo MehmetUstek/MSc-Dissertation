@@ -11,12 +11,12 @@ def ast_match(small_ast, large_ast):
             match_result = dfs_match(found_subtree, value)
             if match_result:
             # print("Match found:" if match_result else "No match found.")
-                return True
+                return found_subtree
             else:
                 continue
         else:
             continue # Do something if needed.
-    return False
+    return None
 
 def missing_configuration_ast_match(small_ast, large_ast):
     for key, value in small_ast.items():
@@ -44,12 +44,12 @@ def missing_configuration_ast_match(small_ast, large_ast):
         if found_subtree: # So the resource exists in the tree. Let's check if the configuration is missing.
             match_result = dfs_match(found_subtree, value)
             if not match_result:
-                return True
+                return found_subtree
             else:
                 continue
         else:
             continue # Do something if needed.
-    return False
+    return None
 
 # Load the full AST from the main Terraform configuration
 # full_ast = parse_terraform('example.tf')

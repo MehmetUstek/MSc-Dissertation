@@ -13,16 +13,12 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_api_gateway_domain_name": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "security_policy": "not TLS_1_2"
-            }
-          }
+      "aws_api_gateway_domain_name": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "security_policy": "not TLS_1_2"
         }
-      ]
+      }
     },
     "errorNo": 2,
     "severity": 10
@@ -41,20 +37,16 @@
   },
   {
     "tree": {
-      "resource": [
-        {
-          "aws_launch_configuration": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
-              "root_block_device": [
-                {
-                  "encrypted": false
-                }
-              ]
+      "aws_launch_configuration": {
+        "resource_name": "bad_example",
+        "resource_configuration": {
+          "root_block_device": [
+            {
+              "encrypted": false
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "errorNo": 4,
     "severity": 10
@@ -94,7 +86,6 @@
   {
     "tree": {
       "aws_docdb_cluster": {
-        "resource_name": "bad_example",
         "resource_configuration": {
           "enabled_cloudwatch_logs_exports": "not audit"
         }
@@ -500,26 +491,6 @@
           "aws_mq_broker": {
             "resource_name": "bad_example",
             "resource_configuration": {
-              "logs": [
-                {
-                  "general": false
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "errorNo": 32,
-    "severity": 2
-  },
-  {
-    "tree": {
-      "resource": [
-        {
-          "aws_mq_broker": {
-            "resource_name": "bad_example",
-            "resource_configuration": {
               "publicly_accessible": true
             }
           }
@@ -703,7 +674,7 @@
       ]
     },
     "errorNo": 46,
-    "severity": 6
+    "severity": 2
   },
 
   {
@@ -813,7 +784,7 @@
     "tree": {
       "github_branch_protection": {
         "resource_configuration": {
-          "require_signed_commits": "false"
+          "require_signed_commits": false
         }
       }
     },
@@ -824,7 +795,7 @@
     "tree": {
       "github_repository": {
         "resource_configuration": {
-          "vulnerability_alerts": "false"
+          "vulnerability_alerts": false
         }
       }
     },

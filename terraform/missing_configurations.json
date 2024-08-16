@@ -1,24 +1,6 @@
 [
   {
     "tree": {
-      "aws_ecs_cluster": {
-        "resource_name": "good_example",
-        "resource_configuration": {
-          "name": "placeholder",
-          "setting": [
-            {
-              "name": "placeholder",
-              "value": "enabled"
-            }
-          ]
-        }
-      }
-    },
-    "errorNo": 44,
-    "severity": 2
-  },
-  {
-    "tree": {
       "aws_athena_database": {
         "resource_name": "bad_example",
         "resource_configuration": {
@@ -128,14 +110,14 @@
   },
   {
     "tree": {
-      "aws_s3_bucket": {
+      "aws_cloudtrail": {
         "resource_configuration": {
           "logging": []
         }
       }
     },
     "errorNo": 56,
-    "severity": 8
+    "severity": 2
   },
   {
     "tree": {
@@ -172,7 +154,7 @@
       }
     },
     "errorNo": 60,
-    "severity": 8
+    "severity": 2
   },
   {
     "tree": {
@@ -271,17 +253,6 @@
       }
     },
     "errorNo": 67,
-    "severity": 8
-  },
-  {
-    "tree": {
-      "aws_ebs_volume": {
-        "resource_configuration": {
-          "kms_key_id": "placeholder"
-        }
-      }
-    },
-    "errorNo": 68,
     "severity": 8
   },
   {
@@ -478,7 +449,7 @@
     "tree": {
       "aws_neptune_cluster": {
         "resource_configuration": {
-          "kms_key_arn": "not empty"
+          "kms_key_arn": true
         }
       }
     },
@@ -592,11 +563,7 @@
     "tree": {
       "aws_s3_bucket": {
         "resource_configuration": {
-          "logging": [
-            {
-              "target_bucket": "target-bucket"
-            }
-          ]
+          "logging": [{}]
         }
       }
     },
